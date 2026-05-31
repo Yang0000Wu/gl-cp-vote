@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes">
+<title>GL CP 投票PK · 为你最爱的CP打call</title>
+<style>
+:root{--bg:#fdf2f8;--card:#fff;--text:#1a1a2e;--sub:#6b7280;--pink:#ec4899;--purple:#8b5cf6;--accent:linear-gradient(135deg,#ec4899,#8b5cf6);--border:#f0d5e8;--shadow:0 4px 24px rgba(236,72,153,.08);--radius:20px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.6;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 20%,rgba(236,72,153,.04) 0%,transparent 50%),radial-gradient(circle at 70% 80%,rgba(139,92,246,.04) 0%,transparent 50%);z-index:-1}
+.container{max-width:480px;margin:0 auto;padding:16px}
+.header{text-align:center;padding:28px 16px 16px}
+.header h1{font-size:28px;font-weight:800;background:var(--accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
+.header .sub{font-size:14px;color:var(--sub)}
+.tabs{display:flex;gap:8px;margin-bottom:20px;background:var(--card);border-radius:var(--radius);padding:4px;box-shadow:var(--shadow)}
+.tab{flex:1;text-align:center;padding:12px;border-radius:16px;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;border:none;background:transparent;color:var(--sub)}
+.tab.active{background:var(--accent);color:#fff}
+.section{display:none}
+.section.active{display:block}
+.cp-card{background:var(--card);border-radius:var(--radius);padding:20px;margin-bottom:14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px;cursor:pointer;transition:.15s;border:2px solid transparent;position:relative}
+.cp-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(236,72,153,.12)}
+.cp-card.voted{border-color:var(--pink)}
+.cp-card .rank{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;background:var(--bg);flex-shrink:0}
+.cp-card .rank.top1{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;font-size:22px}
+.cp-card .rank.top2{background:linear-gradient(135deg,#c0c0c0,#9ca3af);color:#fff}
+.cp-card .rank.top3{background:linear-gradient(135deg,#d97706,#b45309);color:#fff}
+.cp-card .info{flex:1;min-width:0}
+.cp-card .cp-name{font-size:18px;font-weight:700;margin-bottom:2px}
+.cp-card .cp-from{font-size:12px;color:var(--sub)}
+.cp-card .votes{text-align:center;flex-shrink:0}
+.cp-card .votes .num{font-size:24px;font-weight:800;background:var(--accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cp-card .votes .label{font-size:11px;color:var(--sub)}
+.cp-card .voted-mark{position:absolute;top:10px;right:14px;font-size:12px;color:var(--pink);font-weight:600}
+.vote-btn{background:var(--accent);color:#fff;border:none;padding:12px 28px;border-radius:99px;font-size:16px;font-weight:700;cursor:pointer;display:block;width:100%;max-width:300px;margin:24px auto;transition:.15s}
+.vote-btn:hover{opacity:.9;transform:scale(1.02)}
+.vote-btn:disabled{opacity:.4;cursor:default;transform:none}
+.poster-area{text-align:center;padding:20px 0}
+.poster-preview{background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);display:none;margin:16px 0}
+.poster-preview img{width:100%;display:block}
+.result-bar{height:8px;border-radius:4px;background:var(--border);margin-top:8px;overflow:hidden}
+.result-bar .fill{height:100%;border-radius:4px;background:var(--accent);transition:width .5s}
+.total-votes{text-align:center;color:var(--sub);font-size:13px;margin:8px 0 16px}
+.ref-badge{text-align:center;font-size:13px;color:var(--purple);font-weight:600;margin:8px 0;display:none}
+.footer{text-align:center;padding:24px 16px;color:var(--sub);font-size:12px}
+.footer a{color:var(--purple);text-decoration:none}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:12px 24px;border-radius:99px;font-size:14px;font-weight:600;z-index:100;opacity:0;transition:.3s;pointer-events:none}
+.toast.show{opacity:1}
+@keyframes heartBeat{0%,100%{transform:scale(1)}15%{transform:scale(1.3)}30%{transform:scale(1)}45%{transform:scale(1.2)}}
+.heart{animation:heartBeat 1.5s infinite;display:inline-block}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>GL CP 投票PK</h1>
+    <p class="sub">为你最爱的CP投上一票，生成专属海报分享打call</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('vote')">投票</button>
+    <button class="tab" onclick="switchTab('results')">排行</button>
+  </div>
+
+  <div id="ref-badge" class="ref-badge">🎯 朋友邀请你来投票</div>
+
+  <div id="vote-section" class="section active">
+    <div id="cp-list"></div>
+    <button class="vote-btn" id="vote-submit-btn" disabled onclick="submitVote()">请选择一对CP投票</button>
+  </div>
+
+  <div id="results-section" class="section">
+    <div class="total-votes" id="total-votes">加载中...</div>
+    <div id="results-list"></div>
+    <div class="poster-area" id="poster-area">
+      <div class="poster-preview" id="poster-preview"><img id="poster-img" alt="拉票海报"></div>
+      <button class="vote-btn" id="poster-btn" style="display:none" onclick="generatePoster()">🎨 生成拉票海报</button>
+      <button class="vote-btn" id="download-btn" style="display:none" onclick="downloadPoster()">⬇️ 下载海报</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>GL CP Vote · 纯属娱乐 · <a href="#">反馈建议</a></p>
+    <p style="margin-top:4px"><a href="?ref=share_demo" onclick="copyShareLink();return false">📋 复制分享链接</a></p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+// ══════════════════════════════════════════
+// GL CP 投票PK · 纯静态MVP
+// ══════════════════════════════════════════
+
+// ── Config ──
+const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co'
+const SUPABASE_KEY = 'YOUR-ANON-KEY'
+
+// ── CP Data (MVP: hardcoded, P1: user-created) ──
+const CP_LIST = [
+  {id:1, name:'安达 × 岛村', from:'《安达与岛村》', votes:0, color:'#f472b6'},
+  {id:2, name:'忧城 × 千景', from:'《恋语轻唱》', votes:0, color:'#a78bfa'},
+  {id:3, name:'小糸侑 × 七海灯子', from:'《终将成为你》', votes:0, color:'#60a5fa'},
+  {id:4, name:'鹿目圆 × 晓美焰', from:'《魔法少女小圆》', votes:0, color:'#fbbf24'},
+  {id:5, name:'高町奈叶 × 菲特', from:'《魔法少女奈叶》', votes:0, color:'#fb923c'},
+  {id:6, name:'伞木希美 × 铠冢霙', from:'《利兹与青鸟》', votes:0, color:'#34d399'},
+]
+
+// ── State ──
+let selectedCP = null
+let hasVoted = false
+let deviceFingerprint = ''
+let currentTab = 'vote'
+
+// ── Init ──
+async function init() {
+  deviceFingerprint = getFingerprint()
+  loadVotes()
+  checkRef()
+  renderCPList()
+  renderResults()
+}
+init()
+
+// ── Device Fingerprint (simple anti-cheat) ──
+function getFingerprint() {
+  const canvas = document.createElement('canvas')
+  const ctx = canvas.getContext('2d')
+  ctx.textBaseline = 'top'; ctx.font = '14px Arial'
+  ctx.fillText('GLCPVote', 2, 2)
+  const fp = canvas.toDataURL()
+  const stored = localStorage.getItem('glcp_fp')
+  if (!stored) {
+    const fpId = 'fp_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36)
+    localStorage.setItem('glcp_fp', fpId)
+    return fpId
+  }
+  return stored
+}
+
+// ── Check Referral ──
+function checkRef() {
+  const params = new URLSearchParams(location.search)
+  const ref = params.get('ref')
+  if (ref) {
+    document.getElementById('ref-badge').style.display = 'block'
+    // Track referral
+    const refs = JSON.parse(localStorage.getItem('glcp_refs') || '[]')
+    if (!refs.includes(ref)) {
+      refs.push(ref)
+      localStorage.setItem('glcp_refs', JSON.stringify(refs))
+    }
+  }
+}
+
+// ── Load Votes from localStorage (MVP: no backend) ──
+function loadVotes() {
+  const stored = JSON.parse(localStorage.getItem('glcp_votes') || '{}')
+  CP_LIST.forEach(cp => {
+    cp.votes = stored[cp.id] || Math.floor(Math.random() * 50) + 10 // seed data
+  })
+  saveVotes()
+  // Check if this device already voted
+  hasVoted = !!localStorage.getItem('glcp_voted_' + deviceFingerprint)
+  if (hasVoted) {
+    selectedCP = CP_LIST.find(c => c.id === parseInt(localStorage.getItem('glcp_myvote') || '0'))
+  }
+}
+
+function saveVotes() {
+  const data = {}
+  CP_LIST.forEach(cp => { data[cp.id] = cp.votes })
+  localStorage.setItem('glcp_votes', JSON.stringify(data))
+}
+
+// ── Render CP Cards ──
+function renderCPList() {
+  const container = document.getElementById('cp-list')
+  container.innerHTML = CP_LIST.map((cp, i) => `
+    <div class="cp-card ${cp.id === (selectedCP?.id) ? 'voted' : ''}" onclick="selectCP(${cp.id})">
+      <div class="rank rank-top${i<3?(i+1):''}">${i+1}</div>
+      <div class="info">
+        <div class="cp-name">${cp.name}</div>
+        <div class="cp-from">${cp.from}</div>
+      </div>
+      <div class="votes">
+        <div class="num">${cp.votes}</div>
+        <div class="label">票</div>
+      </div>
+      ${cp.id === (selectedCP?.id) ? '<div class="voted-mark">已投票 ✓</div>' : ''}
+    </div>
+  `).join('')
+
+  updateVoteButton()
+}
+
+function renderResults() {
+  const sorted = [...CP_LIST].sort((a, b) => b.votes - a.votes)
+  const total = sorted.reduce((s, c) => s + c.votes, 0)
+  const max = sorted[0]?.votes || 1
+
+  document.getElementById('total-votes').textContent = `共 ${total} 票 · ${CP_LIST.length} 对CP参赛`
+  document.getElementById('results-list').innerHTML = sorted.map((cp, i) => `
+    <div class="cp-card" onclick="selectAndVote(${cp.id})">
+      <div class="rank ${i<3?'top'+(i+1):''}">${i+1}</div>
+      <div class="info" style="flex:1">
+        <div class="cp-name">${cp.name}</div>
+        <div class="cp-from">${cp.from}</div>
+        <div class="result-bar"><div class="fill" style="width:${(cp.votes/max*100).toFixed(1)}%"></div></div>
+      </div>
+      <div class="votes">
+        <div class="num">${cp.votes}</div>
+        <div class="label">票 (${((cp.votes/total)*100).toFixed(1)}%)</div>
+      </div>
+    </div>
+  `).join('')
+}
+
+// ── Vote Logic ──
+function selectCP(id) {
+  if (hasVoted) {
+    showToast('你已经投过票了，快去生成海报吧！')
+    return
+  }
+  selectedCP = CP_LIST.find(c => c.id === id)
+  renderCPList()
+}
+
+function selectAndVote(id) {
+  if (!hasVoted) {
+    selectCP(id)
+    submitVote()
+  }
+}
+
+function updateVoteButton() {
+  const btn = document.getElementById('vote-submit-btn')
+  if (hasVoted) {
+    btn.textContent = '✅ 已投票 · 去看看排行'
+    btn.disabled = false
+    btn.onclick = () => switchTab('results')
+  } else if (selectedCP) {
+    btn.textContent = `为「${selectedCP.name}」投票！`
+    btn.disabled = false
+  } else {
+    btn.textContent = '请选择一对CP投票'
+    btn.disabled = true
+  }
+}
+
+function submitVote() {
+  if (!selectedCP || hasVoted) {
+    if (hasVoted) switchTab('results')
+    return
+  }
+  selectedCP.votes++
+  hasVoted = true
+  localStorage.setItem('glcp_voted_' + deviceFingerprint, '1')
+  localStorage.setItem('glcp_myvote', String(selectedCP.id))
+  saveVotes()
+  renderCPList()
+  renderResults()
+  updateVoteButton()
+  showToast('投票成功！🎉 快去生成海报吧')
+
+  // Auto switch to results after 1s
+  setTimeout(() => {
+    switchTab('results')
+    document.getElementById('poster-btn').style.display = 'block'
+  }, 800)
+}
+
+// ── Tab Switching ──
+function switchTab(tab) {
+  currentTab = tab
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'))
+  if (tab === 'vote') {
+    document.querySelector('.tab:first-child').classList.add('active')
+    document.getElementById('vote-section').classList.add('active')
+  } else {
+    document.querySelector('.tab:last-child').classList.add('active')
+    document.getElementById('results-section').classList.add('active')
+    renderResults()
+    if (hasVoted) {
+      document.getElementById('poster-btn').style.display = 'block'
+    }
+  }
+}
+
+// ── Poster Generation ──
+function generatePoster() {
+  if (!selectedCP) { showToast('请先投票'); return }
+
+  const posterDiv = document.createElement('div')
+  posterDiv.id = 'poster-gen'
+  posterDiv.style.cssText = `
+    width:1080px;height:1920px;position:fixed;left:-9999px;top:0;
+    background:linear-gradient(180deg,${selectedCP.color || '#ec4899'}22 0%,#fff 40%,#fff 70%,${selectedCP.color || '#ec4899'}11 100%);
+    font-family:system-ui,'PingFang SC','Microsoft YaHei',sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:120px 80px;
+  `
+  posterDiv.innerHTML = `
+    <div style="font-size:28px;color:#8b5cf6;margin-bottom:30px">💜 GL CP 投票PK 💜</div>
+    <div style="font-size:80px;font-weight:900;margin:30px 0;background:linear-gradient(135deg,#ec4899,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.2">${selectedCP.name}</div>
+    <div style="font-size:36px;color:#9ca3af;margin-bottom:40px">${selectedCP.from}</div>
+    <div style="font-size:180px;font-weight:900;margin:40px 0;background:linear-gradient(135deg,#ec4899,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${selectedCP.votes} 票</div>
+    <div style="font-size:32px;color:#6b7280;margin-top:40px">当前排名 · 快来投票支持！</div>
+    <div style="margin-top:80px;font-size:24px;color:#d1d5db">扫描二维码或点击链接投票</div>
+    <div style="margin-top:20px;padding:16px 40px;background:#f3f4f6;border-radius:40px;font-size:28px;color:#6b7280">glcp.vote?vote=${selectedCP.id}</div>
+    <div style="margin-top:60px;font-size:24px;color:#c0c0c0">长按保存海报 · 分享到朋友圈为CP拉票</div>
+  `
+  document.body.appendChild(posterDiv)
+
+  html2canvas(posterDiv, {scale:2,useCORS:true,backgroundColor:null}).then(canvas => {
+    document.body.removeChild(posterDiv)
+    const dataUrl = canvas.toDataURL('image/png')
+    document.getElementById('poster-img').src = dataUrl
+    document.getElementById('poster-preview').style.display = 'block'
+    document.getElementById('download-btn').style.display = 'block'
+    showToast('海报已生成！点击下载按钮保存')
+  }).catch(() => {
+    document.body.removeChild(posterDiv)
+    showToast('海报生成失败，请重试')
+  })
+}
+
+function downloadPoster() {
+  const img = document.getElementById('poster-img')
+  if (!img.src) return
+  const a = document.createElement('a')
+  a.href = img.src
+  a.download = `GLCP_${selectedCP?.name || 'vote'}_${Date.now()}.png`
+  a.click()
+  showToast('海报下载中...')
+}
+
+// ── Share Tracking ──
+function copyShareLink() {
+  const shareId = 'share_' + deviceFingerprint + '_' + Date.now().toString(36)
+  const link = location.origin + location.pathname + '?ref=' + shareId
+  navigator.clipboard.writeText(link).then(() => {
+    showToast('分享链接已复制！发送给朋友吧 ✨')
+    // Track share
+    const shares = JSON.parse(localStorage.getItem('glcp_shares') || '[]')
+    shares.push({id:shareId, time:Date.now()})
+    localStorage.setItem('glcp_shares', JSON.stringify(shares))
+  }).catch(() => showToast('复制失败，请手动复制地址栏链接'))
+}
+
+// ── Toast ──
+function showToast(msg) {
+  const toast = document.getElementById('toast')
+  toast.textContent = msg
+  toast.classList.add('show')
+  clearTimeout(toast._timer)
+  toast._timer = setTimeout(() => toast.classList.remove('show'), 2500)
+}
+</script>
+</body>
+</html>
