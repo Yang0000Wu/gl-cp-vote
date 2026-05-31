@@ -102,14 +102,17 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 // ══════════════════════════════════════════
 // GL CP 投票PK · 纯静态MVP
 // ══════════════════════════════════════════
 
 // ── Config ──
-const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co'
-const SUPABASE_KEY = 'YOUR-ANON-KEY'
+const SUPABASE_URL = 'https://oefzzmflkdoigfahbskc.supabase.co'
+const SUPABASE_KEY = 'sb_publishable_R3EGbB23qba66lweHNbLjQ_gzxxVnqB'
+let supabase = null
+try { supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) } catch(e) { console.warn('Supabase not loaded') }
 
 // ── CP Data (MVP: hardcoded, P1: user-created) ──
 const CP_LIST = [
@@ -168,13 +171,29 @@ function checkRef() {
   }
 }
 
-// ── Load Votes from localStorage (MVP: no backend) ──
-function loadVotes() {
-  const stored = JSON.parse(localStorage.getItem('glcp_votes') || '{}')
-  CP_LIST.forEach(cp => {
-    cp.votes = stored[cp.id] || Math.floor(Math.random() * 50) + 10 // seed data
-  })
-  saveVotes()
+// ── Load Votes from Supabase (fallback: localStorage) ──
+async function loadVotes() {
+  // Try Supabase first
+  if (supabase) {
+    try {
+      const { data, error } = await supabase.from('votes').select('*')
+      if (!error && data && data.length > 0) {
+        data.forEach(row => {
+          const cp = CP_LIST.find(c => c.id === row.cp_id)
+          if (cp) cp.votes = row.count
+        })
+      } else {
+        // Seed initial data
+        CP_LIST.forEach(cp => { cp.votes = Math.floor(Math.random() * 50) + 10 })
+      }
+    } catch(e) {
+      // Fallback to localStorage
+      loadFromLocal()
+    }
+  } else {
+    loadFromLocal()
+  }
+
   // Check if this device already voted
   hasVoted = !!localStorage.getItem('glcp_voted_' + deviceFingerprint)
   if (hasVoted) {
@@ -182,7 +201,22 @@ function loadVotes() {
   }
 }
 
-function saveVotes() {
+function loadFromLocal() {
+  const stored = JSON.parse(localStorage.getItem('glcp_votes') || '{}')
+  CP_LIST.forEach(cp => { cp.votes = stored[cp.id] || Math.floor(Math.random() * 50) + 10 })
+}
+
+async function saveVotes(cpId) {
+  // Save to Supabase
+  if (supabase) {
+    try {
+      const cp = CP_LIST.find(c => c.id === cpId)
+      if (cp) {
+        await supabase.from('votes').upsert({ cp_id: cpId, count: cp.votes, updated_at: new Date().toISOString() })
+      }
+    } catch(e) {}
+  }
+  // Also save to localStorage as fallback
   const data = {}
   CP_LIST.forEach(cp => { data[cp.id] = cp.votes })
   localStorage.setItem('glcp_votes', JSON.stringify(data))
@@ -263,7 +297,7 @@ function updateVoteButton() {
   }
 }
 
-function submitVote() {
+async function submitVote() {
   if (!selectedCP || hasVoted) {
     if (hasVoted) switchTab('results')
     return
@@ -272,7 +306,7 @@ function submitVote() {
   hasVoted = true
   localStorage.setItem('glcp_voted_' + deviceFingerprint, '1')
   localStorage.setItem('glcp_myvote', String(selectedCP.id))
-  saveVotes()
+  await saveVotes(selectedCP.id)
   renderCPList()
   renderResults()
   updateVoteButton()
