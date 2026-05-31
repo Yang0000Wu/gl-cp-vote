@@ -80,8 +80,23 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
   </div>
 
   <div class="footer">
-    <p>GL CP Vote · 纯属娱乐 · <a href="#">反馈建议</a></p>
+    <p>GL CP Vote · 纯属娱乐 · <a href="?data" onclick="showData();return false">📊 查看数据</a></p>
     <p style="margin-top:4px"><a href="?ref=share_demo" onclick="copyShareLink();return false">📋 复制分享链接</a></p>
+  </div>
+
+  <div id="data-panel" style="display:none;background:var(--card);border-radius:var(--radius);padding:24px;margin-top:16px;box-shadow:var(--shadow)">
+    <h3 style="margin-bottom:16px">📊 数据面板 <span style="font-size:12px;color:var(--sub);font-weight:400">（本浏览器数据）</span></h3>
+    <div style="display:grid;gap:12px;font-size:14px">
+      <div style="padding:12px;background:var(--bg);border-radius:12px" id="data-votes"></div>
+      <div style="padding:12px;background:var(--bg);border-radius:12px" id="data-shares"></div>
+      <div style="padding:12px;background:var(--bg);border-radius:12px" id="data-refs"></div>
+      <div style="padding:12px;background:var(--bg);border-radius:12px;font-size:12px;color:var(--sub)">
+        <p>设备指纹: <code id="data-fp"></code></p>
+        <p>投票状态: <span id="data-voted"></span></p>
+        <p>投给了: <span id="data-myvote"></span></p>
+        <p style="margin-top:8px">💡 真实数据需接数据库。本面板仅显示当前浏览器 localStorage 数据。</p>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -390,6 +405,33 @@ function copyShareLink() {
 }
 
 // ── Toast ──
+function showData() {
+  const panel = document.getElementById('data-panel')
+  if (panel.style.display === 'block') { panel.style.display = 'none'; return }
+  panel.style.display = 'block'
+
+  // Vote data
+  const votes = JSON.parse(localStorage.getItem('glcp_votes') || '{}')
+  document.getElementById('data-votes').innerHTML = '<strong>📈 票数统计</strong><br>' +
+    CP_LIST.map(c => `${c.name}: <strong>${votes[c.id]||c.votes}</strong> 票`).join('<br>')
+
+  // Share data
+  const shares = JSON.parse(localStorage.getItem('glcp_shares') || '[]')
+  document.getElementById('data-shares').innerHTML = '<strong>📤 分享记录</strong><br>共 ' + shares.length + ' 次分享' +
+    (shares.length ? '<br>' + shares.slice(-5).map(s => new Date(s.time).toLocaleString() + ': ' + s.id.slice(0,12)).join('<br>') : '')
+
+  // Ref data
+  const refs = JSON.parse(localStorage.getItem('glcp_refs') || '[]')
+  document.getElementById('data-refs').innerHTML = '<strong>🔗 引荐来源</strong><br>共 ' + refs.length + ' 个引荐ID' +
+    (refs.length ? '<br>最近: ' + refs.slice(-3).join(', ') : '')
+
+  // Device info
+  document.getElementById('data-fp').textContent = deviceFingerprint.substring(0, 20) + '...'
+  document.getElementById('data-voted').textContent = hasVoted ? '✅ 已投票' : '❌ 未投票'
+  document.getElementById('data-myvote').textContent = selectedCP ? selectedCP.name : '—'
+  panel.scrollIntoView({behavior:'smooth'})
+}
+
 function showToast(msg) {
   const toast = document.getElementById('toast')
   toast.textContent = msg
