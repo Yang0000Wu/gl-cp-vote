@@ -306,44 +306,64 @@ function generatePoster() {
 
   // Title
   ctx.fillStyle = '#8b5cf6'; ctx.font = 'bold 32px system-ui,sans-serif'; ctx.textAlign = 'center'
-  ctx.fillText('💜 GL CP 投票PK 💜', 540, 120)
+  ctx.fillText('💜 GL CP 投票PK 💜', 540, 140)
 
   // CP name
   ctx.font = 'bold 90px system-ui,sans-serif'
   const grad = ctx.createLinearGradient(0, 300, 1080, 300)
   grad.addColorStop(0, '#ec4899'); grad.addColorStop(1, '#8b5cf6')
   ctx.fillStyle = grad
-  // Split long names
   const nameParts = selectedCP.name.split('×').join(' × ')
-  ctx.fillText(nameParts, 540, 380)
+  ctx.fillText(nameParts, 540, 420)
 
   // From
   ctx.fillStyle = '#9ca3af'; ctx.font = '38px system-ui,sans-serif'
-  ctx.fillText(selectedCP.from, 540, 480)
+  ctx.fillText(selectedCP.from, 540, 520)
 
   // Votes
   ctx.fillStyle = grad; ctx.font = 'bold 200px system-ui,sans-serif'
-  ctx.fillText(selectedCP.votes + ' 票', 540, 750)
+  ctx.fillText(selectedCP.votes + ' 票', 540, 800)
 
   // Ranking
   const rank = [...CP_LIST].sort((a,b) => b.votes - a.votes).findIndex(c => c.id === selectedCP.id) + 1
+  const total = CP_LIST.reduce((s,c) => s + c.votes, 0)
   ctx.fillStyle = '#6b7280'; ctx.font = '36px system-ui,sans-serif'
-  ctx.fillText('当前排名第 ' + rank + ' 位 · 快来投票支持！', 540, 880)
+  ctx.fillText('第 ' + rank + ' 名 · 占比 ' + ((selectedCP.votes/total)*100).toFixed(1) + '%', 540, 920)
 
-  // Footer
-  ctx.fillStyle = '#d1d5db'; ctx.font = '26px system-ui,sans-serif'
-  ctx.fillText('扫描二维码或访问投票', 540, 1680)
-  ctx.fillStyle = '#9ca3af'; ctx.font = '22px system-ui,sans-serif'
-  ctx.fillText('glcp.vote?vote=' + selectedCP.id, 540, 1730)
+  const shareUrl = 'https://yang0000wu.github.io/gl-cp-vote/?ref=qr_' + selectedCP.id
 
-  ctx.fillStyle = '#c0c0c0'; ctx.font = '22px system-ui,sans-serif'
-  ctx.fillText('长按保存海报 · 分享到朋友圈为CP拉票', 540, 1820)
+  // Load QR code from API, draw when ready
+  const qrImg = new Image()
+  qrImg.crossOrigin = 'anonymous'
+  qrImg.onload = function() {
+    ctx.fillStyle = '#fff'; ctx.fillRect(380, 1060, 320, 320)
+    ctx.drawImage(qrImg, 380, 1060, 320, 320)
+    ctx.fillStyle = '#6b7280'; ctx.font = '24px system-ui,sans-serif'; ctx.textAlign = 'center'
+    ctx.fillText('扫码投票支持 ' + selectedCP.name, 540, 1430)
+    ctx.fillStyle = '#c0c0c0'; ctx.font = '20px system-ui,sans-serif'
+    ctx.fillText(shareUrl, 540, 1480)
+    ctx.fillStyle = '#d1d5db'; ctx.font = '24px system-ui,sans-serif'
+    ctx.fillText('长按保存海报 · 分享到朋友圈为CP拉票', 540, 1560)
+    finishPoster()
+  }
+  qrImg.onerror = function() {
+    ctx.fillStyle = '#6b7280'; ctx.font = '28px system-ui,sans-serif'; ctx.textAlign = 'center'
+    ctx.fillText('扫描二维码或访问链接投票', 540, 1300)
+    ctx.fillStyle = '#c0c0c0'; ctx.font = '22px system-ui,sans-serif'
+    ctx.fillText(shareUrl, 540, 1380)
+    ctx.fillStyle = '#d1d5db'; ctx.font = '24px system-ui,sans-serif'
+    ctx.fillText('长按保存海报 · 分享到朋友圈为CP拉票', 540, 1560)
+    finishPoster()
+  }
+  qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=' + encodeURIComponent(shareUrl)
 
-  const dataUrl = canvas.toDataURL('image/png')
-  document.getElementById('poster-img').src = dataUrl
-  document.getElementById('poster-preview').style.display = 'block'
-  document.getElementById('download-btn').style.display = 'block'
-  showToast('海报已生成！点击下载按钮保存')
+  function finishPoster() {
+    const dataUrl = canvas.toDataURL('image/png')
+    document.getElementById('poster-img').src = dataUrl
+    document.getElementById('poster-preview').style.display = 'block'
+    document.getElementById('download-btn').style.display = 'block'
+    showToast('海报已生成！点击下载按钮保存')
+  }
 }
 
 function downloadPoster() {
