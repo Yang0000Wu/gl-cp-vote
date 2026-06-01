@@ -186,23 +186,18 @@ async function loadVotes() {
   try {
     const data = await supabaseAPI('votes?select=*')
     if (data && data.length > 0) {
-      data.forEach(row => {
-        const cp = CP_LIST.find(c => c.id === row.cp_id)
-        if (cp) cp.votes = row.count
-      })
-    } else {
-      // 首次访问，生成随机种子票数
-      seedVotes()
+      // 表结构：每票一行，按 cp_id 计数
+      const counts = {}
+      data.forEach(row => { const cid = parseInt(row.cp_id); counts[cid] = (counts[cid] || 0) + 1 })
+      CP_LIST.forEach(cp => { if (counts[cp.id]) cp.votes = counts[cp.id] })
     }
   } catch(e) {
     loadFromLocal()
   }
 
-  // 刷新 UI
   renderCPList()
   renderResults()
 
-  // Check if this device already voted
   hasVoted = !!localStorage.getItem('glcp_voted_' + deviceFingerprint)
   if (hasVoted) {
     selectedCP = CP_LIST.find(c => c.id === parseInt(localStorage.getItem('glcp_myvote') || '0'))
@@ -210,32 +205,19 @@ async function loadVotes() {
   }
 }
 
-function seedVotes() {
-  CP_LIST.forEach(cp => { cp.votes = Math.floor(Math.random() * 50) + 10 })
-  // 写入数据库作为初始数据
-  const rows = CP_LIST.map(cp => ({ cp_id: cp.id, count: cp.votes, updated_at: new Date().toISOString() }))
-  fetch(SUPABASE_URL + '/rest/v1/votes', {
-    method: 'POST',
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' },
-    body: JSON.stringify(rows)
-  }).catch(() => {})
-}
-
 function loadFromLocal() {
   const stored = JSON.parse(localStorage.getItem('glcp_votes') || '{}')
-  CP_LIST.forEach(cp => { cp.votes = stored[cp.id] || Math.floor(Math.random() * 50) + 10 })
+  CP_LIST.forEach(cp => { cp.votes = stored[cp.id] || 0 })
 }
 
 async function saveVotes(cpId) {
   const cp = CP_LIST.find(c => c.id === cpId)
   if (!cp) return
-  // 写入 Supabase
   fetch(SUPABASE_URL + '/rest/v1/votes', {
     method: 'POST',
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' },
-    body: JSON.stringify({ cp_id: cpId, count: cp.votes, updated_at: new Date().toISOString() })
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cp_id: cpId, voter_fingerprint: deviceFingerprint })
   }).catch(() => {})
-  // 同时写 localStorage 兜底
   const data = {}
   CP_LIST.forEach(c => { data[c.id] = c.votes })
   localStorage.setItem('glcp_votes', JSON.stringify(data))
