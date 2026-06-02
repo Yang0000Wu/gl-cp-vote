@@ -135,6 +135,7 @@ const CP_LIST = [
 // ── State ──
 let selectedCP = null
 let hasVoted = false
+let canVoteAgainTime = null  // 可再次投票的时间戳
 let deviceFingerprint = ''
 let currentTab = 'vote'
 let isAdmin = location.search.includes('admin')
@@ -142,8 +143,8 @@ let isAdmin = location.search.includes('admin')
 // ── Init ──
 async function init() {
   deviceFingerprint = getFingerprint()
-  loadVotes()
   checkRef()
+  await loadVotes()
   renderCPList()
   renderResults()
 }
@@ -171,24 +172,23 @@ function checkRef() {
   const ref = params.get('ref')
   if (ref) {
     document.getElementById('ref-badge').style.display = 'block'
+    localStorage.setItem('glcp_referrer', ref)
     const refs = JSON.parse(localStorage.getItem('glcp_refs') || '[]')
     if (!refs.includes(ref)) {
       refs.push(ref)
       localStorage.setItem('glcp_refs', JSON.stringify(refs))
     }
-    // 记录引荐人，用于追踪'谁拉的票生效了'
-    localStorage.setItem('glcp_referrer', ref)
   }
 }
 
 // ── Load Votes from Supabase (fallback: localStorage) ──
 async function loadVotes() {
   try {
-    // 分页拉取所有票（API 单次最多 1000 行）
+    // 分页拉取所有票
     let allRows = []
     let rangeStart = 0
     while (true) {
-      const batch = await supabaseAPI('votes?select=cp_id&limit=1000&offset=' + rangeStart)
+      const batch = await supabaseAPI('votes?select=cp_id,voter_fingerprint,created_at&limit=1000&offset=' + rangeStart)
       if (!batch || batch.length === 0) break
       allRows = allRows.concat(batch)
       if (batch.length < 1000) break
@@ -199,18 +199,37 @@ async function loadVotes() {
       allRows.forEach(row => { const cid = parseInt(row.cp_id); counts[cid] = (counts[cid] || 0) + 1 })
       CP_LIST.forEach(cp => { if (counts[cp.id]) cp.votes = counts[cp.id] })
     }
+
+    // 每日一票：查这个用户最近一次投票
+    const myVotes = allRows.filter(r => r.voter_fingerprint === deviceFingerprint)
+    if (myVotes.length > 0) {
+      // 按时间降序，取最近一条
+      myVotes.sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
+      const lastVote = new Date(myVotes[0].created_at)
+      const nextAllowed = new Date(lastVote.getTime() + 24 * 60 * 60 * 1000)
+      if (Date.now() < nextAllowed.getTime()) {
+        hasVoted = true
+        canVoteAgainTime = nextAllowed.getTime()
+        // 记住投了谁
+        const lastCp = CP_LIST.find(c => c.id === parseInt(myVotes[0].cp_id))
+        if (lastCp) selectedCP = lastCp
+        localStorage.setItem('glcp_myvote', String(myVotes[0].cp_id))
+      } else {
+        hasVoted = false
+        canVoteAgainTime = null
+      }
+    }
   } catch(e) {
     loadFromLocal()
+    // 离线兜底：查 localStorage
+    hasVoted = !!localStorage.getItem('glcp_voted_' + deviceFingerprint)
+    if (hasVoted) {
+      selectedCP = CP_LIST.find(c => c.id === parseInt(localStorage.getItem('glcp_myvote') || '0'))
+    }
   }
 
   renderCPList()
   renderResults()
-
-  hasVoted = !!localStorage.getItem('glcp_voted_' + deviceFingerprint)
-  if (hasVoted) {
-    selectedCP = CP_LIST.find(c => c.id === parseInt(localStorage.getItem('glcp_myvote') || '0'))
-    renderCPList()
-  }
 }
 
 function loadFromLocal() {
@@ -224,7 +243,7 @@ async function saveVotes(cpId) {
   fetch(SUPABASE_URL + '/rest/v1/votes', {
     method: 'POST',
     headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cp_id: cpId, voter_fingerprint: deviceFingerprint })
+    body: JSON.stringify({ cp_id: cpId, voter_fingerprint: deviceFingerprint, referred_by: localStorage.getItem('glcp_referrer') || null })
   }).catch(() => {})
   const data = {}
   CP_LIST.forEach(c => { data[c.id] = c.votes })
@@ -233,13 +252,21 @@ async function saveVotes(cpId) {
 
 // ── Render CP Cards ──
 function renderCPList() {
+  const sorted = [...CP_LIST].sort((a,b) => b.votes - a.votes)
   const container = document.getElementById('cp-list')
-  container.innerHTML = CP_LIST.map((cp, i) => `
+  container.innerHTML = CP_LIST.map((cp, i) => {
+    const rank = sorted.findIndex(c => c.id === cp.id) + 1
+    const gap = rank > 1 ? sorted[rank-2].votes - cp.votes : 0
+    const gapText = rank === 1
+      ? (sorted[1] ? '🏆 领先第2名 ' + (sorted[1].votes - cp.votes) + ' 票' : '🏆 断层第一！')
+      : '🔺 差' + gap + '票超越前一名'
+    return `
     <div class="cp-card ${cp.id === (selectedCP?.id) ? 'voted' : ''}" onclick="selectCP(${cp.id})">
-      <div class="rank rank-top${i<3?(i+1):''}">${i+1}</div>
+      <div class="rank ${rank<=3?'top'+rank:''}">${rank}</div>
       <div class="info">
         <div class="cp-name">${cp.name}</div>
         <div class="cp-from">${cp.from}</div>
+        <div style="font-size:11px;color:var(--sub);margin-top:4px">${gapText}</div>
       </div>
       <div class="votes">
         <div class="num">${cp.votes}</div>
@@ -247,7 +274,7 @@ function renderCPList() {
       </div>
       ${cp.id === (selectedCP?.id) ? '<div class="voted-mark">已投票 ✓</div>' : ''}
     </div>
-  `).join('')
+  `}).join('')
 
   updateVoteButton()
 }
@@ -272,6 +299,11 @@ function renderResults() {
       </div>
     </div>
   `).join('')
+
+  if (!document.getElementById('referral-leaderboard')) {
+    document.getElementById('results-list').insertAdjacentHTML('afterend', '<div id="referral-leaderboard"></div>')
+  }
+  renderReferralLeaderboard()
 }
 
 // ── Vote Logic ──
@@ -567,6 +599,52 @@ function showToast(msg) {
   toast.classList.add('show')
   clearTimeout(toast._timer)
   toast._timer = setTimeout(() => toast.classList.remove('show'), 2500)
+}
+
+// ── 拉票力排行榜 ──
+async function renderReferralLeaderboard() {
+  const wrap = document.getElementById('referral-leaderboard')
+  if (!wrap) return
+  try {
+    let allRows = [], offset = 0
+    while (true) {
+      const batch = await supabaseAPI('votes?select=referred_by,voter_fingerprint&limit=1000&offset=' + offset)
+      if (!batch || batch.length === 0) break
+      allRows = allRows.concat(batch)
+      if (batch.length < 1000) break
+      offset += 1000
+    }
+
+    const refCounts = {}
+    allRows.forEach(r => {
+      if (r.referred_by && !r.voter_fingerprint?.startsWith('seed_')) {
+        refCounts[r.referred_by] = (refCounts[r.referred_by] || 0) + 1
+      }
+    })
+
+    const sorted = Object.entries(refCounts).sort((a,b) => b[1] - a[1])
+
+    let html = '<div style="margin-top:20px">'
+    html += '<h3 style="font-size:16px;margin-bottom:12px">🏆 拉票力排行榜</h3>'
+    if (sorted.length === 0) {
+      html += '<p style="color:var(--sub);font-size:13px">暂无拉票数据。快去分享拉票吧！</p>'
+    } else {
+      html += '<div style="display:grid;gap:8px">'
+      sorted.slice(0, 10).forEach(([refId, count], i) => {
+        const isMine = refId === ('share_' + deviceFingerprint)
+        html += '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg);border-radius:12px;' + (isMine ? 'border:1px solid var(--pink)' : '') + '">'
+        html += '<span style="font-weight:700;font-size:14px;color:var(--sub);width:24px">' + (i+1) + '</span>'
+        html += '<span style="flex:1;font-size:14px">' + (isMine ? '👈 你' : '拉票人 #' + refId.substring(0, 8)) + '</span>'
+        html += '<span style="font-weight:700;color:var(--purple)">' + count + ' 票</span>'
+        html += '</div>'
+      })
+      html += '</div>'
+    }
+    html += '</div>'
+    wrap.innerHTML = html
+  } catch(e) {
+    wrap.innerHTML = '<div style="margin-top:20px;padding:12px;background:var(--bg);border-radius:12px;color:var(--sub);font-size:13px">拉票排行榜加载中...</div>'
+  }
 }
 </script>
 </body>
