@@ -86,19 +86,13 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 
   <div id="data-panel" style="display:none;background:var(--card);border-radius:var(--radius);padding:24px;margin-top:16px;box-shadow:var(--shadow)">
     <h3 style="margin-bottom:16px">📊 数据面板</h3>
+    <div style="display:grid;gap:12px;font-size:14px" id="data-supabase-wrap"></div>
     <div style="display:grid;gap:12px;font-size:14px">
-      <div style="padding:12px;background:rgba(139,92,246,.06);border-radius:12px;border:1px solid rgba(139,92,246,.15)" id="data-supabase">
-        <strong>🌐 服务器数据（Supabase）</strong><br>
-        <span style="font-size:12px;color:var(--sub)">加载中...</span>
-      </div>
-      <div style="padding:12px;background:var(--bg);border-radius:12px" id="data-votes"></div>
-      <div style="padding:12px;background:var(--bg);border-radius:12px" id="data-shares"></div>
-      <div style="padding:12px;background:var(--bg);border-radius:12px" id="data-refs"></div>
       <div style="padding:12px;background:var(--bg);border-radius:12px;font-size:12px;color:var(--sub)">
         <p>设备指纹: <code id="data-fp"></code></p>
         <p>投票状态: <span id="data-voted"></span></p>
         <p>投给了: <span id="data-myvote"></span></p>
-        <p style="margin-top:8px">💡 服务器数据跨设备同步 · 本地数据仅本浏览器</p>
+        <p style="margin-top:8px" id="data-hint"></p>
       </div>
     </div>
   </div>
@@ -143,6 +137,7 @@ let selectedCP = null
 let hasVoted = false
 let deviceFingerprint = ''
 let currentTab = 'vote'
+let isAdmin = location.search.includes('admin')
 
 // ── Init ──
 async function init() {
@@ -176,12 +171,13 @@ function checkRef() {
   const ref = params.get('ref')
   if (ref) {
     document.getElementById('ref-badge').style.display = 'block'
-    // Track referral
     const refs = JSON.parse(localStorage.getItem('glcp_refs') || '[]')
     if (!refs.includes(ref)) {
       refs.push(ref)
       localStorage.setItem('glcp_refs', JSON.stringify(refs))
     }
+    // 记录引荐人，用于追踪'谁拉的票生效了'
+    localStorage.setItem('glcp_referrer', ref)
   }
 }
 
@@ -319,17 +315,58 @@ async function submitVote() {
   hasVoted = true
   localStorage.setItem('glcp_voted_' + deviceFingerprint, '1')
   localStorage.setItem('glcp_myvote', String(selectedCP.id))
+
+  // 引荐追踪：记录是谁拉来的票
+  const referrer = localStorage.getItem('glcp_referrer')
+  if (referrer) {
+    const impact = JSON.parse(localStorage.getItem('glcp_impact') || '{}')
+    impact[referrer] = (impact[referrer] || 0) + 1
+    localStorage.setItem('glcp_impact', JSON.stringify(impact))
+  }
+
   await saveVotes(selectedCP.id)
   renderCPList()
   renderResults()
   updateVoteButton()
-  showToast('投票成功！🎉 快去生成海报吧')
 
-  // Auto switch to results after 1s
+  // 钩子：投票完成后展示个性化的拉票激励
+  const rank = [...CP_LIST].sort((a,b) => b.votes - a.votes).findIndex(c => c.id === selectedCP.id) + 1
+  const behind = rank > 1 ? [...CP_LIST].sort((a,b) => b.votes - a.votes)[rank - 2].votes - selectedCP.votes : 0
+  let hookMsg = '投票成功！🎉 '
+  if (rank === 1) hookMsg += 'TA是第1名！生成海报号召更多人来投票，守住冠军！'
+  else hookMsg += 'TA排第' + rank + '名，只差' + behind + '票就能超过前一名！快来拉票！'
+  showToast(hookMsg)
+
   setTimeout(() => {
     switchTab('results')
     document.getElementById('poster-btn').style.display = 'block'
+    updateVoterDashboard()
   }, 800)
+}
+
+function updateVoterDashboard() {
+  if (!hasVoted || !selectedCP) return
+  const area = document.getElementById('poster-area')
+  const refId = 'share_' + deviceFingerprint
+  const impact = JSON.parse(localStorage.getItem('glcp_impact') || '{}')
+  const myImpact = impact[refId] || 0
+
+  let dashHtml = '<div style="background:linear-gradient(135deg,rgba(236,72,153,.06),rgba(139,92,246,.06));border-radius:16px;padding:20px;margin-bottom:16px;text-align:center">'
+  dashHtml += '<p style="font-size:14px;margin-bottom:4px">💜 你为 <strong>' + selectedCP.name + '</strong> 投了 1 票</p>'
+  if (myImpact > 0) {
+    dashHtml += '<p style="font-size:18px;font-weight:800;background:var(--accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">你已为TA拉了 <span style="font-size:28px">' + myImpact + '</span> 票！</p>'
+  } else {
+    dashHtml += '<p style="font-size:13px;color:var(--sub)">还没拉票？分享海报，每一票都算你的！</p>'
+  }
+  dashHtml += '<p style="font-size:12px;color:var(--sub);margin-top:8px">📋 分享链接带你的专属追踪码，朋友投了自动计入你的拉票数</p>'
+  dashHtml += '</div>'
+
+  const existing = document.getElementById('voter-dashboard')
+  if (existing) existing.remove()
+  const dash = document.createElement('div')
+  dash.id = 'voter-dashboard'
+  dash.innerHTML = dashHtml
+  area.insertBefore(dash, area.firstChild)
 }
 
 // ── Tab Switching ──
@@ -392,7 +429,7 @@ function generatePoster() {
   ctx.fillStyle = '#6b7280'; ctx.font = '36px system-ui,sans-serif'
   ctx.fillText('第 ' + rank + ' 名 · 占比 ' + ((selectedCP.votes/total)*100).toFixed(1) + '%', 540, 920)
 
-  const shareUrl = 'https://yang0000wu.github.io/gl-cp-vote/?ref=qr_' + selectedCP.id
+  const shareUrl = getShareUrl()
 
   // Load QR code from API, draw when ready
   const qrImg = new Image()
@@ -440,15 +477,19 @@ function downloadPoster() {
 
 // ── Share Tracking ──
 function copyShareLink() {
-  const shareId = 'share_' + deviceFingerprint + '_' + Date.now().toString(36)
+  const shareId = 'share_' + deviceFingerprint
   const link = location.origin + location.pathname + '?ref=' + shareId
   navigator.clipboard.writeText(link).then(() => {
-    showToast('分享链接已复制！发送给朋友吧 ✨')
-    // Track share
+    showToast('🔗 专属拉票链接已复制！别人通过这个链接投票，都会算作你拉的票 ✨')
     const shares = JSON.parse(localStorage.getItem('glcp_shares') || '[]')
-    shares.push({id:shareId, time:Date.now()})
+    shares.push({id:shareId, time:Date.now(), cp: selectedCP?.id || 0})
     localStorage.setItem('glcp_shares', JSON.stringify(shares))
   }).catch(() => showToast('复制失败，请手动复制地址栏链接'))
+}
+
+// 生成海报时用专属链接
+function getShareUrl() {
+  return location.origin + location.pathname + '?ref=share_' + deviceFingerprint
 }
 
 // ── Toast ──
@@ -457,40 +498,31 @@ function showData() {
   if (panel.style.display === 'block') { panel.style.display = 'none'; return }
   panel.style.display = 'block'
 
-  // —— LocalStorage 数据 ——
-  const votes = JSON.parse(localStorage.getItem('glcp_votes') || '{}')
-  document.getElementById('data-votes').innerHTML = '<strong>💻 本设备票数</strong><br>' +
-    CP_LIST.map(c => `${c.name}: <strong>${votes[c.id]||0}</strong> 票`).join('<br>')
-
-  const shares = JSON.parse(localStorage.getItem('glcp_shares') || '[]')
-  document.getElementById('data-shares').innerHTML = '<strong>📤 本设备分享记录</strong><br>共 ' + shares.length + ' 次分享' +
-    (shares.length ? '<br>' + shares.slice(-5).map(s => new Date(s.time).toLocaleString() + ': ' + s.id.slice(0,12)).join('<br>') : '')
-
-  const refs = JSON.parse(localStorage.getItem('glcp_refs') || '[]')
-  document.getElementById('data-refs').innerHTML = '<strong>🔗 本设备引荐来源</strong><br>共 ' + refs.length + ' 个引荐ID' +
-    (refs.length ? '<br>最近: ' + refs.slice(-3).join(', ') : '')
-
+  const hint = document.getElementById('data-hint')
   document.getElementById('data-fp').textContent = deviceFingerprint.substring(0, 20) + '...'
   document.getElementById('data-voted').textContent = hasVoted ? '✅ 已投票' : '❌ 未投票'
   document.getElementById('data-myvote').textContent = selectedCP ? selectedCP.name : '—'
 
-  // —— Supabase 实时数据 ——
-  loadSupabaseStats()
+  if (isAdmin) {
+    hint.textContent = '🔐 管理员模式：服务器真实数据已显示'
+    loadSupabaseStats()
+  } else {
+    hint.textContent = '💡 投票数据跨设备同步。详细数据仅管理员可见。'
+    document.getElementById('data-supabase-wrap').innerHTML = ''
+  }
 
   panel.scrollIntoView({behavior:'smooth'})
 }
 
 async function loadSupabaseStats() {
-  const el = document.getElementById('data-supabase')
+  const wrap = document.getElementById('data-supabase-wrap')
   try {
-    // 总体统计
     const countR = await fetch(SUPABASE_URL + '/rest/v1/votes?select=cp_id&limit=1', {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Prefer': 'count=exact' }
     })
     const range = countR.headers.get('content-range')
     const totalVotes = range ? parseInt(range.split('/')[1]) : 0
 
-    // 各 CP 票数（分页汇总）
     let allRows = [], offset = 0
     while (true) {
       const batch = await fetch(SUPABASE_URL + '/rest/v1/votes?select=cp_id,voter_fingerprint&limit=1000&offset=' + offset, {
@@ -510,7 +542,8 @@ async function loadSupabaseStats() {
 
     const realVotes = totalVotes - Object.values(seedCount).reduce((a,b) => a+b, 0)
 
-    let html = '<strong>🌐 服务器总票数：' + totalVotes + '</strong>'
+    let html = '<div style="padding:12px;background:rgba(139,92,246,.06);border-radius:12px;border:1px solid rgba(139,92,246,.15)">'
+    html += '<strong>🌐 服务器总票数：' + totalVotes + '</strong>'
     html += ' · 真实投票：<strong style="color:#ec4899">' + realVotes + '</strong> 票<br>'
     html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 16px;margin-top:6px;font-size:13px">'
     CP_LIST.sort((a,b) => (counts[b.id]||0) - (counts[a.id]||0)).forEach((cp, i) => {
@@ -520,11 +553,11 @@ async function loadSupabaseStats() {
       html += '<div style="text-align:right"><strong>' + c + '</strong> 票' + (s > 0 ? ' <span style="color:#ec4899;font-size:11px">(+' + s + ')</span>' : '') + '</div>'
     })
     html += '</div>'
-    html += '<div style="margin-top:6px;font-size:12px;color:var(--sub)">种子票 ≈ ' + (totalVotes - realVotes) + ' · 真实票 ≈ ' + realVotes + '</div>'
-
-    el.innerHTML = html
+    html += '<div style="margin-top:6px;font-size:12px;color:var(--sub)">种子票 ≈ ' + (totalVotes - realVotes) + ' · 真实票 ≈ ' + realVotes + ' · 剩余可显示行数 = 不限制</div>'
+    html += '</div>'
+    wrap.innerHTML = html
   } catch(e) {
-    el.innerHTML = '<strong>🌐 服务器数据</strong><br><span style="color:var(--sub)">加载失败，请刷新重试</span>'
+    wrap.innerHTML = '<div style="padding:12px;background:var(--bg);border-radius:12px;color:var(--sub)">服务器数据加载失败</div>'
   }
 }
 
