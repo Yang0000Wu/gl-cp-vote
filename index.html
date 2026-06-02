@@ -21,10 +21,15 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 .cp-card{background:var(--card);border-radius:var(--radius);padding:20px;margin-bottom:14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px;cursor:pointer;transition:.15s;border:2px solid transparent;position:relative}
 .cp-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(236,72,153,.12)}
 .cp-card.voted{border-color:var(--pink)}
-.cp-card .rank{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;background:var(--bg);flex-shrink:0}
-.cp-card .rank.top1{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;font-size:22px}
+.cp-card .rank{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;background:var(--bg);flex-shrink:0}
+.cp-card .rank.top1{width:52px;height:52px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;font-size:28px;box-shadow:0 0 0 3px rgba(251,191,36,.3)}
 .cp-card .rank.top2{background:linear-gradient(135deg,#c0c0c0,#9ca3af);color:#fff}
 .cp-card .rank.top3{background:linear-gradient(135deg,#d97706,#b45309);color:#fff}
+.cp-card .gap-badge{display:inline-block;padding:3px 12px;border-radius:99px;font-size:13px;font-weight:700;margin-top:6px;line-height:1.6}
+.cp-card .gap-badge.leading{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff}
+.cp-card .gap-badge.chasing{background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff}
+.comp-banner{background:linear-gradient(135deg,rgba(236,72,153,.1),rgba(139,92,246,.1));border-radius:12px;padding:12px 16px;text-align:center;margin-bottom:16px;font-size:14px;font-weight:600;line-height:1.5}
+.comp-banner .hl{color:#ec4899;font-size:20px}
 .cp-card .info{flex:1;min-width:0}
 .cp-card .cp-name{font-size:18px;font-weight:700;margin-bottom:2px}
 .cp-card .cp-from{font-size:12px;color:var(--sub)}
@@ -63,6 +68,7 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
   </div>
 
   <div id="ref-badge" class="ref-badge">🎯 朋友邀请你来投票</div>
+  <div id="comp-banner" class="comp-banner" style="display:none"></div>
 
   <div id="vote-section" class="section active">
     <div id="cp-list"></div>
@@ -254,19 +260,32 @@ async function saveVotes(cpId) {
 function renderCPList() {
   const sorted = [...CP_LIST].sort((a,b) => b.votes - a.votes)
   const container = document.getElementById('cp-list')
+
+  // 竞争氛围条
+  const banner = document.getElementById('comp-banner')
+  if (sorted[0] && sorted[1]) {
+    const gap = sorted[0].votes - sorted[1].votes
+    banner.innerHTML = '🔥 <span class="hl">' + sorted[0].name.split('×')[0] + '</span> 领先 <span class="hl">' + sorted[1].name.split('×')[0] + '</span> ' + (gap > 0 ? '<span class="hl">' + gap + '</span> 票' : '<span class="hl">胶着</span> ！')
+    banner.style.display = 'block'
+  } else {
+    banner.style.display = 'none'
+  }
+
   container.innerHTML = CP_LIST.map((cp, i) => {
     const rank = sorted.findIndex(c => c.id === cp.id) + 1
     const gap = rank > 1 ? sorted[rank-2].votes - cp.votes : 0
-    const gapText = rank === 1
-      ? (sorted[1] ? '🏆 领先第2名 ' + (sorted[1].votes - cp.votes) + ' 票' : '🏆 断层第一！')
-      : '🔺 差' + gap + '票超越前一名'
+    const isFirst = rank === 1
+    const badgeClass = isFirst ? 'gap-badge leading' : 'gap-badge chasing'
+    const badgeText = isFirst
+      ? (sorted[1] ? '🏆 领先 ' + (sorted[1].votes - cp.votes) + ' 票' : '🏆 断层第一')
+      : '🔺 差 ' + gap + ' 票可反超'
     return `
     <div class="cp-card ${cp.id === (selectedCP?.id) ? 'voted' : ''}" onclick="selectCP(${cp.id})">
-      <div class="rank ${rank<=3?'top'+rank:''}">${rank}</div>
+      <div class="rank ${rank<=3?'top'+rank:''}">${rank === 1 ? '👑' : rank}</div>
       <div class="info">
         <div class="cp-name">${cp.name}</div>
         <div class="cp-from">${cp.from}</div>
-        <div style="font-size:11px;color:var(--sub);margin-top:4px">${gapText}</div>
+        <div class="${badgeClass}">${badgeText}</div>
       </div>
       <div class="votes">
         <div class="num">${cp.votes}</div>
@@ -287,7 +306,7 @@ function renderResults() {
   document.getElementById('total-votes').textContent = `共 ${total} 票 · ${CP_LIST.length} 对CP参赛`
   document.getElementById('results-list').innerHTML = sorted.map((cp, i) => `
     <div class="cp-card" onclick="selectAndVote(${cp.id})">
-      <div class="rank ${i<3?'top'+(i+1):''}">${i+1}</div>
+      <div class="rank ${i<3?'top'+(i+1):''}">${i === 0 ? '👑' : (i+1)}</div>
       <div class="info" style="flex:1">
         <div class="cp-name">${cp.name}</div>
         <div class="cp-from">${cp.from}</div>
@@ -330,7 +349,14 @@ function updateVoteButton() {
     btn.disabled = false
     btn.onclick = () => switchTab('results')
   } else if (selectedCP) {
-    btn.textContent = `为「${selectedCP.name}」投票！`
+    const sorted = [...CP_LIST].sort((a,b) => b.votes - a.votes)
+    const rank = sorted.findIndex(c => c.id === selectedCP.id) + 1
+    if (rank === 1) {
+      btn.textContent = '为「' + selectedCP.name + '」投票 · 保持第1！'
+    } else {
+      const gap = sorted[rank-2].votes - selectedCP.votes
+      btn.textContent = '为「' + selectedCP.name + '」投票 · 差' + gap + '票反超！'
+    }
     btn.disabled = false
   } else {
     btn.textContent = '请选择一对CP投票'
