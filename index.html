@@ -80,7 +80,16 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
     <div id="results-list"></div>
     <div class="poster-area" id="poster-area">
       <div class="poster-preview" id="poster-preview"><img id="poster-img" alt="拉票海报"></div>
-      <button class="vote-btn" id="poster-btn" style="display:none" onclick="generatePoster()">🎨 生成拉票海报</button>
+      <button class="vote-btn" id="poster-btn" style="display:none">🎨 选择平台生成海报</button>
+      <div id="platform-picker" style="display:none;margin-bottom:16px">
+        <p style="font-size:14px;font-weight:600;text-align:center;margin-bottom:8px">📍 发到哪个平台？</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:320px;margin:0 auto">
+          <button class="vote-btn" style="font-size:13px;padding:8px;margin:0" onclick="generatePoster('lofter')">✍️ Lofter</button>
+          <button class="vote-btn" style="font-size:13px;padding:8px;margin:0" onclick="generatePoster('weibo')">🔁 微博</button>
+          <button class="vote-btn" style="font-size:13px;padding:8px;margin:0" onclick="generatePoster('xhs')">📕 小红书</button>
+          <button class="vote-btn" style="font-size:13px;padding:8px;margin:0" onclick="generatePoster('other')">📍 其他</button>
+        </div>
+      </div>
       <button class="vote-btn" id="download-btn" style="display:none" onclick="downloadPoster()">⬇️ 下载海报</button>
     </div>
   </div>
@@ -399,6 +408,10 @@ async function submitVote() {
   setTimeout(() => {
     switchTab('results')
     document.getElementById('poster-btn').style.display = 'block'
+    document.getElementById('poster-btn').onclick = function() {
+      this.style.display = 'none'
+      document.getElementById('platform-picker').style.display = 'block'
+    }
     updateVoterDashboard()
   }, 800)
 }
@@ -442,12 +455,19 @@ function switchTab(tab) {
     renderResults()
     if (hasVoted) {
       document.getElementById('poster-btn').style.display = 'block'
+      document.getElementById('poster-btn').onclick = function() {
+        this.style.display = 'none'
+        document.getElementById('platform-picker').style.display = 'block'
+      }
     }
   }
 }
 
 // ── Poster Generation ──
-function generatePoster() {
+let posterSource = ''
+function generatePoster(source) {
+  posterSource = source
+  document.getElementById('platform-picker').style.display = 'none'
   if (!selectedCP) { showToast('请先投票'); return }
   const canvas = document.createElement('canvas')
   canvas.width = 1080; canvas.height = 1920
@@ -500,8 +520,9 @@ function generatePoster() {
     ctx.fillText('扫码投票支持 ' + selectedCP.name, 540, 1430)
     ctx.fillStyle = '#c0c0c0'; ctx.font = '20px system-ui,sans-serif'
     ctx.fillText(shareUrl, 540, 1480)
+    const shareLabel = posterSource === 'lofter' ? '分享到Lofter' : posterSource === 'weibo' ? '分享到微博' : posterSource === 'xhs' ? '分享到小红书' : '分享为CP拉票'
     ctx.fillStyle = '#d1d5db'; ctx.font = '24px system-ui,sans-serif'
-    ctx.fillText('长按保存海报 · 分享到朋友圈为CP拉票', 540, 1560)
+    ctx.fillText('长按保存海报 · ' + shareLabel, 540, 1560)
     finishPoster()
   }
   qrImg.onerror = function() {
@@ -510,7 +531,7 @@ function generatePoster() {
     ctx.fillStyle = '#c0c0c0'; ctx.font = '22px system-ui,sans-serif'
     ctx.fillText(shareUrl, 540, 1380)
     ctx.fillStyle = '#d1d5db'; ctx.font = '24px system-ui,sans-serif'
-    ctx.fillText('长按保存海报 · 分享到朋友圈为CP拉票', 540, 1560)
+    ctx.fillText('长按保存海报 · ' + (posterSource === 'lofter' ? '分享到Lofter' : posterSource === 'weibo' ? '分享到微博' : posterSource === 'xhs' ? '分享到小红书' : '分享为CP拉票'), 540, 1560)
     finishPoster()
   }
   qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=' + encodeURIComponent(shareUrl)
@@ -548,7 +569,9 @@ function copyShareLink() {
 
 // 生成海报时用专属链接
 function getShareUrl() {
-  return location.origin + location.pathname + '?ref=share_' + deviceFingerprint
+  let url = location.origin + location.pathname + '?ref=share_' + deviceFingerprint
+  if (posterSource) url += '&source=' + posterSource
+  return url
 }
 
 // ── Toast ──
