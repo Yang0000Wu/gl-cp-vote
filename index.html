@@ -353,7 +353,7 @@ function renderResults() {
 
 // ── Vote Logic ──
 function selectCP(id) {
-  if (hasVoted) {
+  if (hasVoted && !isAdmin) {
     showToast('你已经投过票了，快去生成海报吧！')
     return
   }
@@ -362,7 +362,7 @@ function selectCP(id) {
 }
 
 function selectAndVote(id) {
-  if (!hasVoted) {
+  if (!hasVoted || isAdmin) {
     selectCP(id)
     submitVote()
   }
@@ -370,7 +370,7 @@ function selectAndVote(id) {
 
 function updateVoteButton() {
   const btn = document.getElementById('vote-submit-btn')
-  if (hasVoted) {
+  if (hasVoted && !isAdmin) {
     btn.textContent = '✅ 已投票 · 去看看排行'
     btn.disabled = false
     btn.onclick = () => switchTab('results')
@@ -391,8 +391,8 @@ function updateVoteButton() {
 }
 
 async function submitVote() {
-  if (!selectedCP || hasVoted) {
-    if (hasVoted) switchTab('results')
+  if (!selectedCP || (hasVoted && !isAdmin)) {
+    if (hasVoted && !isAdmin) switchTab('results')
     return
   }
   selectedCP.votes++
