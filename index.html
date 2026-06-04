@@ -228,7 +228,10 @@ async function loadVotes() {
     }
     if (allRows.length > 0) {
       const counts = {}
-      allRows.forEach(row => { const cid = parseInt(row.cp_id); counts[cid] = (counts[cid] || 0) + 1 })
+      allRows.forEach(row => {
+        if (row.voter_fingerprint && row.voter_fingerprint.startsWith('seed_')) return
+        const cid = parseInt(row.cp_id); counts[cid] = (counts[cid] || 0) + 1
+      })
       CP_LIST.forEach(cp => { if (counts[cp.id]) cp.votes = counts[cp.id] })
     }
 
