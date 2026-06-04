@@ -276,10 +276,11 @@ function loadFromLocal() {
 async function saveVotes(cpId) {
   const cp = CP_LIST.find(c => c.id === cpId)
   if (!cp) return
+  const fp = isAdmin ? 'seed_admin_' + deviceFingerprint : deviceFingerprint
   fetch(SUPABASE_URL + '/rest/v1/votes', {
     method: 'POST',
     headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cp_id: cpId, voter_fingerprint: deviceFingerprint, referred_by: localStorage.getItem('glcp_referrer') || null, source: utmSource || null })
+    body: JSON.stringify({ cp_id: cpId, voter_fingerprint: fp, referred_by: localStorage.getItem('glcp_referrer') || null, source: utmSource || null })
   }).catch(() => {})
   const data = {}
   CP_LIST.forEach(c => { data[c.id] = c.votes })
