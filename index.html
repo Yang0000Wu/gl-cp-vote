@@ -790,26 +790,11 @@ async function renderReferralLeaderboard() {
       }
     })
 
-    // 如果真实数据不足，用模拟数据填充排行榜（启动社交证明）
-    const minEntries = 5
-    const demoReferrers = [
-      { id:'demo_lingorm_top', label:'LingOrm 应援团', count:12 },
-      { id:'demo_freenbecky', label:'FB 粉丝后援会', count:9 },
-      { id:'demo_anadashima', label:'安达岛村应援部', count:7 },
-      { id:'demo_milklove', label:'MilkLove  CP 推', count:5 },
-      { id:'demo_namtanfilm', label:'NamtanFilm 激推', count:3 },
-    ]
     const myRefId = 'share_' + deviceFingerprint
     const myServerCount = refCounts[myRefId] || 0
 
-    // 合并：真实数据 + demo 数据（demo 不计入真实票）
-    const merged = { ...refCounts }
-    if (Object.keys(refCounts).filter(k => !k.startsWith('demo_')).length < minEntries) {
-      demoReferrers.forEach(d => { if (!merged[d.id]) merged[d.id] = d.count })
-    }
-
-    const sorted = Object.entries(merged)
-      .filter(([k]) => k.startsWith('share_') || k.startsWith('demo_'))
+    const sorted = Object.entries(refCounts)
+      .filter(([k]) => k.startsWith('share_'))
       .sort((a,b) => b[1] - a[1])
 
     let html = '<div style="margin-top:20px">'
@@ -822,10 +807,7 @@ async function renderReferralLeaderboard() {
       html += '<div style="display:grid;gap:8px">'
       sorted.slice(0, 10).forEach(([refId, count], i) => {
         const isMine = refId === myRefId
-        const isDemo = refId.startsWith('demo_')
-        const demoLabel = demoReferrers.find(d => d.id === refId)?.label || ''
-        const displayName = isMine ? '👈 你' : (isDemo ? demoLabel : '拉票人 #' + refId.substring(6, 14))
-        const showBadge = isDemo ? 'style="font-size:11px;color:var(--sub)"' : ''
+        const displayName = isMine ? '👈 你' : '拉票人 #' + refId.substring(6, 14)
         html += '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg);border-radius:12px;' + (isMine ? 'border:1px solid var(--pink)' : '') + '">'
         html += '<span style="font-weight:700;font-size:14px;color:var(--sub);width:24px">' + (i+1) + '</span>'
         html += '<span style="flex:1;font-size:14px">' + displayName + '</span>'
