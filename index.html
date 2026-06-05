@@ -3,154 +3,98 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes">
-<title>GL CP 投票PK · 为你最爱的CP打call</title>
+<title>GL CP 战力排行</title>
 <style>
 :root{--bg:#fdf2f8;--card:#fff;--text:#1a1a2e;--sub:#6b7280;--pink:#ec4899;--purple:#8b5cf6;--accent:linear-gradient(135deg,#ec4899,#8b5cf6);--border:#f0d5e8;--shadow:0 4px 24px rgba(236,72,153,.08);--radius:20px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.6;min-height:100vh;overflow-x:hidden}
 body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 20%,rgba(236,72,153,.04) 0%,transparent 50%),radial-gradient(circle at 70% 80%,rgba(139,92,246,.04) 0%,transparent 50%);z-index:-1}
 .container{max-width:480px;margin:0 auto;padding:16px}
-.header{text-align:center;padding:28px 16px 16px}
-.header h1{font-size:28px;font-weight:800;background:var(--accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
-.header .sub{font-size:14px;color:var(--sub)}
-.tabs{display:flex;gap:8px;margin-bottom:20px;background:var(--card);border-radius:var(--radius);padding:4px;box-shadow:var(--shadow)}
-.tab{flex:1;text-align:center;padding:12px;border-radius:16px;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;border:none;background:transparent;color:var(--sub)}
-.tab.active{background:var(--accent);color:#fff}
-.section{display:none}
-.section.active{display:block}
-.cp-card{background:var(--card);border-radius:var(--radius);padding:20px;margin-bottom:14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px;cursor:pointer;transition:.15s;border:2px solid transparent;position:relative}
-.cp-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(236,72,153,.12)}
+.header{text-align:center;padding:24px 16px 12px}
+.header h1{font-size:26px;font-weight:800;background:var(--accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:2px}
+.header .sub{font-size:13px;color:var(--sub)}
+.cp-card{background:var(--card);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px;box-shadow:var(--shadow);display:flex;align-items:center;gap:14px;border:2px solid transparent;position:relative}
 .cp-card.voted{border-color:var(--pink)}
-.cp-card .rank{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;background:var(--bg);flex-shrink:0}
-.cp-card .rank.top1{width:52px;height:52px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;font-size:28px;box-shadow:0 0 0 3px rgba(251,191,36,.3)}
+.cp-card .rank{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;background:var(--bg);flex-shrink:0}
+.cp-card .rank.top1{width:48px;height:48px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;font-size:26px;box-shadow:0 0 0 3px rgba(251,191,36,.3)}
 .cp-card .rank.top2{background:linear-gradient(135deg,#c0c0c0,#9ca3af);color:#fff}
 .cp-card .rank.top3{background:linear-gradient(135deg,#d97706,#b45309);color:#fff}
-.cp-card .gap-badge{display:inline-block;padding:3px 12px;border-radius:99px;font-size:13px;font-weight:700;margin-top:6px;line-height:1.6}
+.cp-card .info{flex:1;min-width:0}
+.cp-card .cp-name{font-size:17px;font-weight:700;margin-bottom:1px}
+.cp-card .cp-from{font-size:11px;color:var(--sub)}
+.cp-card .gap-badge{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:700;margin-top:4px;line-height:1.5}
 .cp-card .gap-badge.leading{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff}
 .cp-card .gap-badge.chasing{background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff}
-.comp-banner{background:linear-gradient(135deg,rgba(236,72,153,.1),rgba(139,92,246,.1));border-radius:12px;padding:12px 16px;text-align:center;margin-bottom:16px;font-size:14px;font-weight:600;line-height:1.5}
-.comp-banner .hl{color:#ec4899;font-size:20px}
-.cp-card .info{flex:1;min-width:0}
-.cp-card .cp-name{font-size:18px;font-weight:700;margin-bottom:2px}
-.cp-card .cp-from{font-size:12px;color:var(--sub)}
-.cp-card .votes{text-align:center;flex-shrink:0}
-.cp-card .votes .num{font-size:24px;font-weight:800;background:var(--accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.cp-card .votes .label{font-size:11px;color:var(--sub)}
-.cp-card .voted-mark{position:absolute;top:10px;right:14px;font-size:12px;color:var(--pink);font-weight:600}
-.vote-btn{background:var(--accent);color:#fff;border:none;padding:12px 28px;border-radius:99px;font-size:16px;font-weight:700;cursor:pointer;display:block;width:100%;max-width:300px;margin:24px auto;transition:.15s}
-.vote-btn:hover{opacity:.9;transform:scale(1.02)}
-.vote-btn:disabled{opacity:.4;cursor:default;transform:none}
-.poster-area{text-align:center;padding:20px 0}
-.poster-preview{background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);display:none;margin:16px 0}
-.poster-preview img{width:100%;display:block}
-.result-bar{height:8px;border-radius:4px;background:var(--border);margin-top:8px;overflow:hidden}
-.result-bar .fill{height:100%;border-radius:4px;background:var(--accent);transition:width .5s}
-.total-votes{text-align:center;color:var(--sub);font-size:13px;margin:8px 0 16px}
-.ref-badge{text-align:center;font-size:13px;color:var(--purple);font-weight:600;margin:8px 0;display:none}
-.footer{text-align:center;padding:24px 16px;color:var(--sub);font-size:12px}
+.cp-card .votes{text-align:center;min-width:50px}
+.cp-card .votes .num{font-size:22px;font-weight:800;background:var(--accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cp-card .votes .label{font-size:10px;color:var(--sub)}
+.vote-btn-sm{background:var(--accent);color:#fff;border:none;padding:6px 14px;border-radius:99px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;flex-shrink:0;margin-left:4px}
+.vote-btn-sm:hover{opacity:.9;transform:scale(1.05)}
+.vote-btn-sm:disabled{opacity:.4;cursor:default;transform:none}
+.vote-btn-sm.done{background:#9ca3af}
+.comp-banner{background:linear-gradient(135deg,rgba(236,72,153,.1),rgba(139,92,246,.1));border-radius:12px;padding:10px 14px;text-align:center;margin-bottom:14px;font-size:14px;font-weight:600;line-height:1.5}
+.comp-banner .hl{color:#ec4899;font-size:18px}
+.total-votes{text-align:center;color:var(--sub);font-size:13px;margin:6px 0 14px}
+.card-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:200;display:none;justify-content:center;align-items:center;padding:20px}
+.card-box{background:#fff;border-radius:24px;padding:24px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.card-box img{width:100%;border-radius:16px;margin-bottom:12px}
+.card-box .dl-btn{background:var(--accent);color:#fff;border:none;padding:12px 24px;border-radius:99px;font-size:15px;font-weight:700;cursor:pointer;width:100%;margin-top:4px}
+.card-box .dl-btn:hover{opacity:.9;transform:scale(1.02)}
+.card-box .close-btn{background:transparent;color:var(--sub);border:none;padding:10px;font-size:13px;cursor:pointer;margin-top:6px;width:100%}
+.footer{text-align:center;padding:20px 16px;color:var(--sub);font-size:12px}
 .footer a{color:var(--purple);text-decoration:none}
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:12px 24px;border-radius:99px;font-size:14px;font-weight:600;z-index:100;opacity:0;transition:.3s;pointer-events:none}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:600;z-index:100;opacity:0;transition:.3s;pointer-events:none}
 .toast.show{opacity:1}
-@keyframes heartBeat{0%,100%{transform:scale(1)}15%{transform:scale(1.3)}30%{transform:scale(1)}45%{transform:scale(1.2)}}
-.heart{animation:heartBeat 1.5s infinite;display:inline-block}
-.wp-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:200;display:none;justify-content:center;align-items:center;padding:20px}
-.wp-card{background:#fff;border-radius:24px;padding:20px;max-width:360px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-.wp-card img{width:100%;border-radius:16px;margin-bottom:12px}
-.wp-card .wp-btn{background:var(--accent);color:#fff;border:none;padding:12px 24px;border-radius:99px;font-size:15px;font-weight:700;cursor:pointer;width:100%;margin-top:4px;transition:.15s}
-.wp-card .wp-btn:hover{opacity:.9;transform:scale(1.02)}
-.wp-card .wp-close{background:transparent;color:var(--sub);border:none;padding:10px;font-size:13px;cursor:pointer;margin-top:8px;width:100%}
-.wp-card .wp-tip{font-size:12px;color:var(--sub);margin-top:8px}
 </style>
 </head>
 <body>
 <div class="container">
   <div class="header">
-    <h1>GL CP 投票PK</h1>
-    <p class="sub">为你最爱的CP投上一票，生成专属海报分享打call</p>
+    <h1>GL CP 战力排行</h1>
+    <p class="sub">实时排名 · 每日一票</p>
   </div>
 
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('vote')">投票</button>
-    <button class="tab" onclick="switchTab('results')">排行</button>
-  </div>
-
-  <div id="ref-badge" class="ref-badge">🎯 朋友邀请你来投票</div>
   <div id="comp-banner" class="comp-banner" style="display:none"></div>
-
-  <div id="vote-section" class="section active">
-    <div id="cp-list"></div>
-    <button class="vote-btn" id="vote-submit-btn" disabled onclick="submitVote()">请选择一对CP投票</button>
-  </div>
-
-  <div id="results-section" class="section">
-    <div class="total-votes" id="total-votes">加载中...</div>
-    <div id="results-list"></div>
-    <div class="poster-area" id="poster-area">
-      <div class="poster-preview" id="poster-preview"><img id="poster-img" alt="拉票海报"></div>
-      <button class="vote-btn" id="poster-btn" style="display:none">🎨 选择平台生成海报</button>
-      <div id="platform-picker" style="display:none;margin-bottom:16px">
-        <p style="font-size:14px;font-weight:600;text-align:center;margin-bottom:8px">📍 发到哪个平台？</p>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:320px;margin:0 auto">
-          <button class="vote-btn" style="font-size:13px;padding:8px;margin:0" onclick="generatePoster('lofter')">✍️ Lofter</button>
-          <button class="vote-btn" style="font-size:13px;padding:8px;margin:0" onclick="generatePoster('weibo')">🔁 微博</button>
-          <button class="vote-btn" style="font-size:13px;padding:8px;margin:0" onclick="generatePoster('xhs')">📕 小红书</button>
-          <button class="vote-btn" style="font-size:13px;padding:8px;margin:0" onclick="generatePoster('other')">📍 其他</button>
-        </div>
-      </div>
-      <button class="vote-btn" id="download-btn" style="display:none" onclick="downloadPoster()">⬇️ 下载海报</button>
-    </div>
-  </div>
+  <div class="total-votes" id="total-votes">加载中...</div>
+  <div id="cp-list"></div>
 
   <div class="footer">
-    <p>GL CP Vote · 纯属娱乐 · <a href="?data" onclick="showData();return false">📊 查看数据</a></p>
-    <p style="margin-top:4px"><a href="?ref=share_demo" onclick="copyShareLink();return false">📋 复制分享链接</a></p>
+    <p>GL CP Vote · <a href="?data" onclick="showData();return false">📊 数据</a></p>
   </div>
 
-  <div id="data-panel" style="display:none;background:var(--card);border-radius:var(--radius);padding:24px;margin-top:16px;box-shadow:var(--shadow)">
-    <h3 style="margin-bottom:16px">📊 数据面板</h3>
-    <div style="display:grid;gap:12px;font-size:14px" id="data-supabase-wrap"></div>
-    <div style="display:grid;gap:12px;font-size:14px">
-      <div style="padding:12px;background:var(--bg);border-radius:12px;font-size:12px;color:var(--sub)">
-        <p>设备指纹: <code id="data-fp"></code></p>
-        <p>投票状态: <span id="data-voted"></span></p>
+  <div id="data-panel" style="display:none;background:var(--card);border-radius:var(--radius);padding:20px;margin-top:16px;box-shadow:var(--shadow)">
+    <h3 style="margin-bottom:14px;font-size:15px">📊 数据面板</h3>
+    <div style="display:grid;gap:12px;font-size:13px" id="data-supabase-wrap"></div>
+    <div style="display:grid;gap:10px;font-size:13px;margin-top:10px">
+      <div style="padding:10px;background:var(--bg);border-radius:10px;font-size:12px;color:var(--sub)">
+        <p>设备: <code id="data-fp"></code></p>
+        <p>状态: <span id="data-voted"></span></p>
         <p>投给了: <span id="data-myvote"></span></p>
-        <p style="margin-top:8px" id="data-hint"></p>
+        <p style="margin-top:6px" id="data-hint"></p>
       </div>
     </div>
   </div>
 </div>
 
-<div class="wp-overlay" id="wp-overlay" onclick="if(event.target===this)closeWallpaper()">
-  <div class="wp-card">
-    <img id="wp-img" alt="手机壁纸">
-    <button class="wp-btn" id="wp-download-btn" onclick="downloadWallpaper()">⬇️ 保存到手机</button>
-    <p class="wp-tip">长按图片也可以保存</p>
-    <button class="wp-close" onclick="closeWallpaper()">关闭</button>
+<div class="card-overlay" id="card-overlay" onclick="if(event.target===this)closeCard()">
+  <div class="card-box">
+    <img id="card-img" alt="战力卡">
+    <button class="dl-btn" id="card-dl-btn" onclick="downloadCard()">⬇️ 保存战力卡</button>
+    <p style="font-size:11px;color:var(--sub);margin-top:6px">长按图片也可以保存</p>
+    <button class="close-btn" onclick="closeCard()">关闭</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════
-// GL CP 投票PK · 纯静态MVP
-// ══════════════════════════════════════════
-
-// ── Config ──
+// ═══ Config ═══
 const SUPABASE_URL = 'https://oefzzmflkdoigfahbskc.supabase.co'
 const SUPABASE_KEY = 'sb_publishable_R3EGbB23qba66lweHNbLjQ_gzxxVnqB'
-// 用 fetch 直接调 Supabase REST API，不依赖外部 SDK CDN
-function supabaseAPI(path, options = {}) {
-  const url = SUPABASE_URL + '/rest/v1/' + path
-  const headers = {
-    'apikey': SUPABASE_KEY,
-    'Authorization': 'Bearer ' + SUPABASE_KEY,
-    ...(options.headers || {})
-  }
-  return fetch(url, { ...options, headers }).then(r => r.json()).catch(() => null)
+function supabaseAPI(path, opts = {}) {
+  return fetch(SUPABASE_URL + '/rest/v1/' + path, { ...opts, headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, ...(opts.headers||{}) } }).then(r => r.json()).catch(() => null)
 }
 
-// ── CP Data (MVP: hardcoded, P1: user-created) ──
 const CP_LIST = [
   {id:1, name:'忧城 × 千景', from:'《恋语轻唱》', votes:0, color:'#a78bfa'},
   {id:2, name:'小糸侑 × 七海灯子', from:'《终将成为你》', votes:0, color:'#60a5fa'},
@@ -164,32 +108,19 @@ const CP_LIST = [
   {id:10, name:'甘露寺蜜璃 × 胡蝶忍', from:'《鬼灭之刃》', votes:0, color:'#fb7185'},
 ]
 
-// ── State ──
-let selectedCP = null
 let hasVoted = false
-let canVoteAgainTime = null  // 可再次投票的时间戳
 let deviceFingerprint = ''
-let currentTab = 'vote'
 let isAdmin = location.search.includes('admin')
-let utmSource = new URLSearchParams(location.search).get('source') || new URLSearchParams(location.search).get('utm_source') || ''
 
-// ── Init ──
+// ═══ Init ═══
 async function init() {
   deviceFingerprint = getFingerprint()
-  checkRef()
   await loadVotes()
-  renderCPList()
-  renderResults()
+  render()
 }
 init()
 
-// ── Device Fingerprint (simple anti-cheat) ──
 function getFingerprint() {
-  const canvas = document.createElement('canvas')
-  const ctx = canvas.getContext('2d')
-  ctx.textBaseline = 'top'; ctx.font = '14px Arial'
-  ctx.fillText('GLCPVote', 2, 2)
-  const fp = canvas.toDataURL()
   const stored = localStorage.getItem('glcp_fp')
   if (!stored) {
     const fpId = 'fp_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36)
@@ -199,120 +130,63 @@ function getFingerprint() {
   return stored
 }
 
-// ── Check Referral ──
-function checkRef() {
-  const params = new URLSearchParams(location.search)
-  const ref = params.get('ref')
-  if (ref) {
-    document.getElementById('ref-badge').style.display = 'block'
-    localStorage.setItem('glcp_referrer', ref)
-    const refs = JSON.parse(localStorage.getItem('glcp_refs') || '[]')
-    if (!refs.includes(ref)) {
-      refs.push(ref)
-      localStorage.setItem('glcp_refs', JSON.stringify(refs))
-    }
-  }
-}
-
-// ── Load Votes from Supabase (fallback: localStorage) ──
+// ═══ Data ═══
 async function loadVotes() {
   try {
-    // 分页拉取所有票
-    let allRows = []
-    let rangeStart = 0
+    let all = [], off = 0
     while (true) {
-      const batch = await supabaseAPI('votes?select=cp_id,voter_fingerprint,created_at&limit=1000&offset=' + rangeStart)
-      if (!batch || batch.length === 0) break
-      allRows = allRows.concat(batch)
-      if (batch.length < 1000) break
-      rangeStart += 1000
+      const b = await supabaseAPI('votes?select=cp_id,voter_fingerprint,created_at&limit=1000&offset=' + off)
+      if (!b || !b.length) break
+      all = all.concat(b)
+      if (b.length < 1000) break
+      off += 1000
     }
-    if (allRows.length > 0) {
-      const counts = {}
-      allRows.forEach(row => {
-        if (row.voter_fingerprint && row.voter_fingerprint.startsWith('seed_')) return
-        const cid = parseInt(row.cp_id); counts[cid] = (counts[cid] || 0) + 1
-      })
-      CP_LIST.forEach(cp => { if (counts[cp.id]) cp.votes = counts[cp.id] })
-    }
+    const counts = {}
+    all.forEach(r => {
+      if (r.voter_fingerprint && r.voter_fingerprint.startsWith('seed_')) return
+      const cid = parseInt(r.cp_id); counts[cid] = (counts[cid] || 0) + 1
+    })
+    CP_LIST.forEach(cp => { cp.votes = counts[cp.id] || 0 })
 
-    // 每日一票：查这个用户最近一次投票
-    const myVotes = allRows.filter(r => r.voter_fingerprint === deviceFingerprint)
-    if (myVotes.length > 0) {
-      // 按时间降序，取最近一条
-      myVotes.sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
-      const lastVote = new Date(myVotes[0].created_at)
-      const nextAllowed = new Date(lastVote.getTime() + 24 * 60 * 60 * 1000)
-      if (Date.now() < nextAllowed.getTime()) {
-        hasVoted = true
-        canVoteAgainTime = nextAllowed.getTime()
-        // 记住投了谁
-        const lastCp = CP_LIST.find(c => c.id === parseInt(myVotes[0].cp_id))
-        if (lastCp) selectedCP = lastCp
-        localStorage.setItem('glcp_myvote', String(myVotes[0].cp_id))
-      } else {
-        hasVoted = false
-        canVoteAgainTime = null
-      }
+    const my = all.filter(r => r.voter_fingerprint === deviceFingerprint)
+    if (my.length) {
+      my.sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
+      if (Date.now() < new Date(my[0].created_at).getTime() + 86400000) hasVoted = true
     }
   } catch(e) {
-    loadFromLocal()
-    // 离线兜底：查 localStorage
+    const stored = JSON.parse(localStorage.getItem('glcp_votes') || '{}')
+    CP_LIST.forEach(cp => { cp.votes = stored[cp.id] || 0 })
     hasVoted = !!localStorage.getItem('glcp_voted_' + deviceFingerprint)
-    if (hasVoted) {
-      selectedCP = CP_LIST.find(c => c.id === parseInt(localStorage.getItem('glcp_myvote') || '0'))
-    }
   }
-
-  renderCPList()
-  renderResults()
 }
 
-function loadFromLocal() {
-  const stored = JSON.parse(localStorage.getItem('glcp_votes') || '{}')
-  CP_LIST.forEach(cp => { cp.votes = stored[cp.id] || 0 })
-}
-
-async function saveVotes(cpId) {
-  const cp = CP_LIST.find(c => c.id === cpId)
-  if (!cp) return
-  const fp = isAdmin ? 'seed_admin_' + deviceFingerprint : deviceFingerprint
-  fetch(SUPABASE_URL + '/rest/v1/votes', {
-    method: 'POST',
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cp_id: cpId, voter_fingerprint: fp, referred_by: localStorage.getItem('glcp_referrer') || null, source: utmSource || null })
-  }).catch(() => {})
-  const data = {}
-  CP_LIST.forEach(c => { data[c.id] = c.votes })
-  localStorage.setItem('glcp_votes', JSON.stringify(data))
-}
-
-// ── Render CP Cards ──
-function renderCPList() {
+// ═══ Render ═══
+function render() {
   const sorted = [...CP_LIST].sort((a,b) => b.votes - a.votes)
-  const container = document.getElementById('cp-list')
+  const total = sorted.reduce((s,c) => s + c.votes, 0)
+  const max = sorted[0]?.votes || 1
 
-  // 竞争氛围条
+  document.getElementById('total-votes').textContent = (total > 0 ? `共 ${total} 票 · ` : '') + `${CP_LIST.length} 对CP参赛`
+
+  // 竞争条
   const banner = document.getElementById('comp-banner')
   if (sorted[0] && sorted[1]) {
     const gap = sorted[0].votes - sorted[1].votes
-    banner.innerHTML = '🔥 <span class="hl">' + sorted[0].name.split('×')[0] + '</span> 领先 <span class="hl">' + sorted[1].name.split('×')[0] + '</span> ' + (gap > 0 ? '<span class="hl">' + gap + '</span> 票' : '<span class="hl">胶着</span> ！')
+    if (gap > 0) banner.innerHTML = '🔥 <span class="hl">' + sorted[0].name.split('×')[0] + '</span> 领先 <span class="hl">' + sorted[1].name.split('×')[0] + '</span> <span class="hl">' + gap + '</span> 票'
+    else banner.innerHTML = '🔥 <span class="hl">' + sorted[0].name.split('×')[0] + '</span> 与 <span class="hl">' + sorted[1].name.split('×')[0] + '</span> 胶着！'
     banner.style.display = 'block'
-  } else {
-    banner.style.display = 'none'
-  }
+  } else banner.style.display = 'none'
 
-  container.innerHTML = CP_LIST.map((cp, i) => {
-    const rank = sorted.findIndex(c => c.id === cp.id) + 1
-    const gap = rank > 1 ? sorted[rank-2].votes - cp.votes : 0
-    const isFirst = rank === 1
+  document.getElementById('cp-list').innerHTML = sorted.map((cp, i) => {
+    const gap = i > 0 ? sorted[i-1].votes - cp.votes : 0
+    const isFirst = i === 0
     const badgeClass = isFirst ? 'gap-badge leading' : 'gap-badge chasing'
-    const badgeText = isFirst
-      ? (sorted[1] ? '🏆 领先 ' + (sorted[1].votes - cp.votes) + ' 票' : '🏆 断层第一')
-      : '🔺 差 ' + gap + ' 票可反超'
-    return `
-    <div class="cp-card ${cp.id === (selectedCP?.id) ? 'voted' : ''}" onclick="selectCP(${cp.id})">
-      <div class="rank ${rank<=3?'top'+rank:''}">${rank === 1 ? '👑' : rank}</div>
+    const badgeText = isFirst ? (gap > 0 ? '🏆 领先 ' + gap + ' 票' : '🏆 第1') : '🔺 差 ' + gap + ' 票可反超'
+    const btnDisabled = hasVoted && !isAdmin
+    const btnText = btnDisabled ? '已投' : (isFirst ? '保持第1' : '差' + gap + '反超')
+    const btnClass = btnDisabled ? 'vote-btn-sm done' : 'vote-btn-sm'
+    return `<div class="cp-card ${cp.id === lastVotedCpId ? 'voted' : ''}">
+      <div class="rank ${i<3?'top'+(i+1):''}">${i === 0 ? '👑' : (i+1)}</div>
       <div class="info">
         <div class="cp-name">${cp.name}</div>
         <div class="cp-from">${cp.from}</div>
@@ -322,516 +196,172 @@ function renderCPList() {
         <div class="num">${cp.votes}</div>
         <div class="label">票</div>
       </div>
-      ${cp.id === (selectedCP?.id) ? '<div class="voted-mark">已投票 ✓</div>' : ''}
-    </div>
-  `}).join('')
-
-  updateVoteButton()
+      <button class="${btnClass}" onclick="vote(${cp.id})" ${btnDisabled ? 'disabled' : ''}>${btnText}</button>
+    </div>`
+  }).join('')
 }
 
-function renderResults() {
-  const sorted = [...CP_LIST].sort((a, b) => b.votes - a.votes)
-  const total = sorted.reduce((s, c) => s + c.votes, 0)
-  const max = sorted[0]?.votes || 1
+// ═══ Vote ═══
+let lastVotedCpId = null
 
-  document.getElementById('total-votes').textContent = `共 ${total} 票 · ${CP_LIST.length} 对CP参赛`
-  document.getElementById('results-list').innerHTML = sorted.map((cp, i) => `
-    <div class="cp-card" onclick="selectAndVote(${cp.id})">
-      <div class="rank ${i<3?'top'+(i+1):''}">${i === 0 ? '👑' : (i+1)}</div>
-      <div class="info" style="flex:1">
-        <div class="cp-name">${cp.name}</div>
-        <div class="cp-from">${cp.from}</div>
-        <div class="result-bar"><div class="fill" style="width:${(cp.votes/max*100).toFixed(1)}%"></div></div>
-      </div>
-      <div class="votes">
-        <div class="num">${cp.votes}</div>
-        <div class="label">票 (${((cp.votes/total)*100).toFixed(1)}%)</div>
-      </div>
-    </div>
-  `).join('')
-
-  if (!document.getElementById('referral-leaderboard')) {
-    document.getElementById('results-list').insertAdjacentHTML('afterend', '<div id="referral-leaderboard"></div>')
-  }
-  renderReferralLeaderboard()
-}
-
-// ── Vote Logic ──
-function selectCP(id) {
-  if (hasVoted && !isAdmin) {
-    showToast('你已经投过票了，快去生成海报吧！')
-    return
-  }
-  selectedCP = CP_LIST.find(c => c.id === id)
-  renderCPList()
-}
-
-function selectAndVote(id) {
-  if (!hasVoted || isAdmin) {
-    selectCP(id)
-    submitVote()
-  }
-}
-
-function updateVoteButton() {
-  const btn = document.getElementById('vote-submit-btn')
-  if (hasVoted && !isAdmin) {
-    btn.textContent = '✅ 已投票 · 去看看排行'
-    btn.disabled = false
-    btn.onclick = () => switchTab('results')
-  } else if (selectedCP) {
-    const sorted = [...CP_LIST].sort((a,b) => b.votes - a.votes)
-    const rank = sorted.findIndex(c => c.id === selectedCP.id) + 1
-    if (rank === 1) {
-      btn.textContent = '为「' + selectedCP.name + '」投票 · 保持第1！'
-    } else {
-      const gap = sorted[rank-2].votes - selectedCP.votes
-      btn.textContent = '为「' + selectedCP.name + '」投票 · 差' + gap + '票反超！'
-    }
-    btn.disabled = false
-  } else {
-    btn.textContent = '请选择一对CP投票'
-    btn.disabled = true
-  }
-}
-
-async function submitVote() {
-  if (!selectedCP || (hasVoted && !isAdmin)) {
-    if (hasVoted && !isAdmin) switchTab('results')
-    return
-  }
-  selectedCP.votes++
+async function vote(cpId) {
+  if (hasVoted && !isAdmin) { showToast('每天限投1票，明天再来！'); return }
+  const cp = CP_LIST.find(c => c.id === cpId)
+  if (!cp) return
+  cp.votes++
   hasVoted = true
+  lastVotedCpId = cpId
   localStorage.setItem('glcp_voted_' + deviceFingerprint, '1')
-  localStorage.setItem('glcp_myvote', String(selectedCP.id))
+  localStorage.setItem('glcp_myvote', String(cpId))
 
-  // 引荐追踪：记录是谁拉来的票
-  const referrer = localStorage.getItem('glcp_referrer')
-  if (referrer) {
-    const impact = JSON.parse(localStorage.getItem('glcp_impact') || '{}')
-    impact[referrer] = (impact[referrer] || 0) + 1
-    localStorage.setItem('glcp_impact', JSON.stringify(impact))
-  }
+  const fp = isAdmin ? 'seed_admin_' + deviceFingerprint : deviceFingerprint
+  fetch(SUPABASE_URL + '/rest/v1/votes', {
+    method: 'POST',
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cp_id: cpId, voter_fingerprint: fp })
+  }).catch(() => {})
 
-  await saveVotes(selectedCP.id)
-  renderCPList()
-  renderResults()
-  updateVoteButton()
-
-  // 钩子：投票完成后展示个性化的拉票激励
-  const rank = [...CP_LIST].sort((a,b) => b.votes - a.votes).findIndex(c => c.id === selectedCP.id) + 1
-  const behind = rank > 1 ? [...CP_LIST].sort((a,b) => b.votes - a.votes)[rank - 2].votes - selectedCP.votes : 0
-  let hookMsg = '投票成功！🎉 领取 ' + selectedCP.name.split('×')[0].trim() + ' 专属壁纸 👉'
-  showToast(hookMsg)
-
-  setTimeout(() => {
-    switchTab('results')
-    document.getElementById('poster-btn').style.display = 'block'
-    document.getElementById('poster-btn').onclick = function() {
-      this.style.display = 'none'
-      document.getElementById('platform-picker').style.display = 'block'
-    }
-    updateVoterDashboard()
-  }, 800)
+  render()
+  showCard(cp)
 }
 
-function updateVoterDashboard() {
-  if (!hasVoted || !selectedCP) return
-  const area = document.getElementById('poster-area')
-  const refId = 'share_' + deviceFingerprint
-  const impact = JSON.parse(localStorage.getItem('glcp_impact') || '{}')
-  const myImpact = impact[refId] || 0
+// ═══ 战力卡 ═══
+let lastCardUrl = ''
 
-  let dashHtml = '<div style="background:linear-gradient(135deg,rgba(236,72,153,.06),rgba(139,92,246,.06));border-radius:16px;padding:20px;margin-bottom:16px;text-align:center">'
-  dashHtml += '<p style="font-size:14px;margin-bottom:4px">💜 你为 <strong>' + selectedCP.name + '</strong> 投了 1 票</p>'
-  dashHtml += '<button onclick="showWallpaper()" style="background:var(--accent);color:#fff;border:none;padding:10px 24px;border-radius:99px;font-size:14px;font-weight:700;cursor:pointer;margin:8px 0;transition:.15s">🎁 领取 ' + selectedCP.name.split('×')[0].trim() + ' 专属壁纸</button>'
-  if (myImpact > 0) {
-    dashHtml += '<p style="font-size:18px;font-weight:800;background:var(--accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">你已为TA拉了 <span style="font-size:28px">' + myImpact + '</span> 票！</p>'
-  } else {
-    dashHtml += '<p style="font-size:13px;color:var(--sub)">还没拉票？分享海报，每一票都算你的！</p>'
-  }
-  dashHtml += '<p style="font-size:12px;color:var(--sub);margin-top:8px">📋 分享链接带你的专属追踪码，朋友投了自动计入你的拉票数</p>'
-  dashHtml += '</div>'
-
-  const existing = document.getElementById('voter-dashboard')
-  if (existing) existing.remove()
-  const dash = document.createElement('div')
-  dash.id = 'voter-dashboard'
-  dash.innerHTML = dashHtml
-  area.insertBefore(dash, area.firstChild)
-}
-
-// ── Tab Switching ──
-function switchTab(tab) {
-  currentTab = tab
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'))
-  if (tab === 'vote') {
-    document.querySelector('.tab:first-child').classList.add('active')
-    document.getElementById('vote-section').classList.add('active')
-  } else {
-    document.querySelector('.tab:last-child').classList.add('active')
-    document.getElementById('results-section').classList.add('active')
-    renderResults()
-    if (hasVoted) {
-      document.getElementById('poster-btn').style.display = 'block'
-      document.getElementById('poster-btn').onclick = function() {
-        this.style.display = 'none'
-        document.getElementById('platform-picker').style.display = 'block'
-      }
-    }
-  }
-}
-
-// ── Poster Generation ──
-let posterSource = ''
-function generatePoster(source) {
-  posterSource = source
-  document.getElementById('platform-picker').style.display = 'none'
-  if (!selectedCP) { showToast('请先投票'); return }
+function showCard(cp) {
+  const w = 700, h = 1000
   const canvas = document.createElement('canvas')
-  canvas.width = 1080; canvas.height = 1920
+  canvas.width = w; canvas.height = h
   const ctx = canvas.getContext('2d')
 
-  // Background
-  const bg = ctx.createLinearGradient(0, 0, 0, 1920)
-  bg.addColorStop(0, '#fdf2f8'); bg.addColorStop(0.4, '#ffffff'); bg.addColorStop(0.7, '#ffffff'); bg.addColorStop(1, '#fdf2f8')
-  ctx.fillStyle = bg; ctx.fillRect(0, 0, 1080, 1920)
+  // 背景渐变
+  const grad = ctx.createLinearGradient(0, 0, w, h)
+  grad.addColorStop(0, cp.color + 'cc'); grad.addColorStop(0.5, '#fff'); grad.addColorStop(1, cp.color + '88')
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h)
 
-  // Decorative circles
-  ctx.fillStyle = 'rgba(236,72,153,0.04)'; ctx.beginPath(); ctx.arc(200, 300, 400, 0, Math.PI*2); ctx.fill()
-  ctx.fillStyle = 'rgba(139,92,246,0.04)'; ctx.beginPath(); ctx.arc(880, 1600, 500, 0, Math.PI*2); ctx.fill()
+  // CP名
+  ctx.textAlign = 'center'
+  const parts = cp.name.split('×')
+  ctx.fillStyle = '#1a1a2e'
+  if (parts.length === 2) {
+    ctx.font = 'bold 64px system-ui,sans-serif'; ctx.fillText(parts[0].trim(), w/2, 200)
+    ctx.font = '36px system-ui,sans-serif'; ctx.fillStyle = '#9ca3af'; ctx.fillText('×', w/2, 280)
+    ctx.font = 'bold 64px system-ui,sans-serif'; ctx.fillStyle = '#1a1a2e'; ctx.fillText(parts[1].trim(), w/2, 360)
+  } else {
+    ctx.font = 'bold 72px system-ui,sans-serif'; ctx.fillText(cp.name, w/2, 280)
+  }
 
-  // Title
-  ctx.fillStyle = '#8b5cf6'; ctx.font = 'bold 32px system-ui,sans-serif'; ctx.textAlign = 'center'
-  ctx.fillText('💜 GL CP 投票PK 💜', 540, 140)
+  // 出处
+  ctx.font = '28px system-ui,sans-serif'; ctx.fillStyle = '#6b7280'
+  ctx.fillText(cp.from, w/2, 440)
 
-  // CP name
-  ctx.font = 'bold 90px system-ui,sans-serif'
-  const grad = ctx.createLinearGradient(0, 300, 1080, 300)
-  grad.addColorStop(0, '#ec4899'); grad.addColorStop(1, '#8b5cf6')
-  ctx.fillStyle = grad
-  const nameParts = selectedCP.name.split('×').join(' × ')
-  ctx.fillText(nameParts, 540, 420)
+  // 票数（大号）
+  const rank = [...CP_LIST].sort((a,b) => b.votes - a.votes).findIndex(c => c.id === cp.id) + 1
+  ctx.font = 'bold 140px system-ui,sans-serif'
+  ctx.fillStyle = cp.color
+  ctx.fillText(cp.votes + ' 票', w/2, 620)
 
-  // From
-  ctx.fillStyle = '#9ca3af'; ctx.font = '38px system-ui,sans-serif'
-  ctx.fillText(selectedCP.from, 540, 520)
-
-  // Votes
-  ctx.fillStyle = grad; ctx.font = 'bold 200px system-ui,sans-serif'
-  ctx.fillText(selectedCP.votes + ' 票', 540, 800)
-
-  // Ranking
-  const rank = [...CP_LIST].sort((a,b) => b.votes - a.votes).findIndex(c => c.id === selectedCP.id) + 1
+  // 排名
+  ctx.font = 'bold 48px system-ui,sans-serif'
+  ctx.fillStyle = cp.color
   const total = CP_LIST.reduce((s,c) => s + c.votes, 0)
-  ctx.fillStyle = '#6b7280'; ctx.font = '36px system-ui,sans-serif'
-  ctx.fillText('第 ' + rank + ' 名 · 占比 ' + ((selectedCP.votes/total)*100).toFixed(1) + '%', 540, 920)
+  ctx.fillText('第 ' + rank + ' 名', w/2, 710)
 
-  const shareUrl = getShareUrl()
+  // 差距
+  const sorted = [...CP_LIST].sort((a,b) => b.votes - a.votes)
+  const gap = rank > 1 ? sorted[rank-2].votes - cp.votes : sorted[0].votes - (sorted[1]?.votes || 0)
+  ctx.font = '32px system-ui,sans-serif'
+  ctx.fillStyle = '#6b7280'
+  if (rank === 1 && gap > 0) ctx.fillText('领先 第2名 ' + gap + ' 票', w/2, 780)
+  else if (rank === 1) ctx.fillText('断层第一！', w/2, 780)
+  else ctx.fillText('差 ' + gap + ' 票反超 ' + sorted[rank-2].name.split('×')[0].trim(), w/2, 780)
 
-  // Load QR code from API, draw when ready
-  const qrImg = new Image()
-  qrImg.crossOrigin = 'anonymous'
-  qrImg.onload = function() {
-    ctx.fillStyle = '#fff'; ctx.fillRect(380, 1060, 320, 320)
-    ctx.drawImage(qrImg, 380, 1060, 320, 320)
-    ctx.fillStyle = '#6b7280'; ctx.font = '24px system-ui,sans-serif'; ctx.textAlign = 'center'
-    ctx.fillText('扫码投票支持 ' + selectedCP.name, 540, 1430)
-    ctx.fillStyle = '#c0c0c0'; ctx.font = '20px system-ui,sans-serif'
-    ctx.fillText(shareUrl, 540, 1480)
-    const shareLabel = posterSource === 'lofter' ? '分享到Lofter' : posterSource === 'weibo' ? '分享到微博' : posterSource === 'xhs' ? '分享到小红书' : '分享为CP拉票'
-    ctx.fillStyle = '#d1d5db'; ctx.font = '24px system-ui,sans-serif'
-    ctx.fillText('长按保存海报 · ' + shareLabel, 540, 1560)
-    finishPoster()
-  }
-  qrImg.onerror = function() {
-    ctx.fillStyle = '#6b7280'; ctx.font = '28px system-ui,sans-serif'; ctx.textAlign = 'center'
-    ctx.fillText('扫描二维码或访问链接投票', 540, 1300)
-    ctx.fillStyle = '#c0c0c0'; ctx.font = '22px system-ui,sans-serif'
-    ctx.fillText(shareUrl, 540, 1380)
-    ctx.fillStyle = '#d1d5db'; ctx.font = '24px system-ui,sans-serif'
-    ctx.fillText('长按保存海报 · ' + (posterSource === 'lofter' ? '分享到Lofter' : posterSource === 'weibo' ? '分享到微博' : posterSource === 'xhs' ? '分享到小红书' : '分享为CP拉票'), 540, 1560)
-    finishPoster()
-  }
-  qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=' + encodeURIComponent(shareUrl)
+  // 底部水印
+  ctx.font = '18px system-ui,sans-serif'; ctx.fillStyle = '#c0c0c0'
+  ctx.fillText('GL CP Vote · yang0000wu.github.io/gl-cp-vote', w/2, h - 40)
 
-  function finishPoster() {
-    const dataUrl = canvas.toDataURL('image/png')
-    document.getElementById('poster-img').src = dataUrl
-    document.getElementById('poster-preview').style.display = 'block'
-    document.getElementById('download-btn').style.display = 'block'
-    showToast('海报已生成！点击下载按钮保存')
-  }
+  lastCardUrl = canvas.toDataURL('image/png')
+  document.getElementById('card-img').src = lastCardUrl
+  document.getElementById('card-overlay').style.display = 'flex'
+  showToast('投票成功！🎉')
 }
 
-function downloadPoster() {
-  const img = document.getElementById('poster-img')
-  if (!img.src) return
+function downloadCard() {
+  if (!lastCardUrl) return
   const a = document.createElement('a')
-  a.href = img.src
-  a.download = `GLCP_${selectedCP?.name || 'vote'}_${Date.now()}.png`
+  a.href = lastCardUrl
+  a.download = 'CP_' + Date.now() + '.png'
   a.click()
-  showToast('海报下载中...')
 }
 
-// ── 专属壁纸生成（每次不同） ──
-let lastWallpaperUrl = ''
-
-function showWallpaper() {
-  document.getElementById('wp-overlay').style.display = 'flex'
-  generateWallpaper()
+function closeCard() {
+  document.getElementById('card-overlay').style.display = 'none'
 }
 
-function closeWallpaper() {
-  document.getElementById('wp-overlay').style.display = 'none'
-}
-
-function generateWallpaper() {
-  if (!selectedCP) return
-  const cp = selectedCP
-  const n = Math.floor(Math.random() * 10) + 1
-  const img = new Image()
-  img.crossOrigin = 'anonymous'
-  img.onload = function() {
-    // 把 webp 画到 canvas 上供下载
-    const canvas = document.createElement('canvas')
-    canvas.width = img.naturalWidth; canvas.height = img.naturalHeight
-    const ctx = canvas.getContext('2d')
-    ctx.drawImage(img, 0, 0)
-    lastWallpaperUrl = canvas.toDataURL('image/png')
-    document.getElementById('wp-img').src = lastWallpaperUrl
-  }
-  img.onerror = function() {
-    showToast('壁纸加载失败，试试重新生成')
-  }
-  img.src = 'wallpapers/cp' + cp.id + '_' + n + '.webp'
-}
-
-function downloadWallpaper() {
-  if (!lastWallpaperUrl) return
-  const a = document.createElement('a')
-  a.href = lastWallpaperUrl
-  a.download = (selectedCP ? selectedCP.name.replace('×','x') : 'wallpaper') + '_' + Date.now() + '.png'
-  a.click()
-  showToast('壁纸已保存 ✅')
-}
-
-// ── Share Tracking ──
-function copyShareLink() {
-  const shareId = 'share_' + deviceFingerprint
-  const link = location.origin + location.pathname + '?ref=' + shareId
-  navigator.clipboard.writeText(link).then(() => {
-    showToast('🔗 专属拉票链接已复制！别人通过这个链接投票，都会算作你拉的票 ✨')
-    const shares = JSON.parse(localStorage.getItem('glcp_shares') || '[]')
-    shares.push({id:shareId, time:Date.now(), cp: selectedCP?.id || 0})
-    localStorage.setItem('glcp_shares', JSON.stringify(shares))
-  }).catch(() => showToast('复制失败，请手动复制地址栏链接'))
-}
-
-// 生成海报时用专属链接
-function getShareUrl() {
-  let url = location.origin + location.pathname + '?ref=share_' + deviceFingerprint
-  if (posterSource) url += '&source=' + posterSource
-  return url
-}
-
-// ── Toast ──
+// ═══ Admin Panel ═══
 function showData() {
   const panel = document.getElementById('data-panel')
   if (panel.style.display === 'block') { panel.style.display = 'none'; return }
   panel.style.display = 'block'
-
-  const hint = document.getElementById('data-hint')
   document.getElementById('data-fp').textContent = deviceFingerprint.substring(0, 20) + '...'
-  document.getElementById('data-voted').textContent = hasVoted ? '✅ 已投票' : '❌ 未投票'
-  document.getElementById('data-myvote').textContent = selectedCP ? selectedCP.name : '—'
-
+  document.getElementById('data-voted').textContent = hasVoted ? '已投票' : '未投票'
+  document.getElementById('data-myvote').textContent = lastVotedCpId ? (CP_LIST.find(c => c.id === lastVotedCpId)?.name || '—') : '—'
   if (isAdmin) {
-    hint.textContent = '🔐 管理员模式：服务器真实数据已显示'
+    document.getElementById('data-hint').textContent = '管理员模式：服务器真实数据'
     loadSupabaseStats()
   } else {
-    hint.textContent = '💡 投票数据跨设备同步。详细数据仅管理员可见。'
+    document.getElementById('data-hint').textContent = '仅管理员可见'
     document.getElementById('data-supabase-wrap').innerHTML = ''
   }
-
   panel.scrollIntoView({behavior:'smooth'})
 }
 
 async function loadSupabaseStats() {
   const wrap = document.getElementById('data-supabase-wrap')
   try {
-    const countR = await fetch(SUPABASE_URL + '/rest/v1/votes?select=cp_id&limit=1', {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Prefer': 'count=exact' }
-    })
-    const range = countR.headers.get('content-range')
-    const totalVotes = range ? parseInt(range.split('/')[1]) : 0
-
-    let allRows = [], offset = 0
+    let all = [], off = 0
     while (true) {
-      const batch = await fetch(SUPABASE_URL + '/rest/v1/votes?select=cp_id,voter_fingerprint,created_at,referred_by,source&limit=1000&offset=' + offset, {
+      const batch = await fetch(SUPABASE_URL + '/rest/v1/votes?select=cp_id,voter_fingerprint,created_at,referred_by,source&limit=1000&offset=' + off, {
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
       }).then(r => r.json()).catch(() => [])
-      if (!batch || batch.length === 0) break
-      allRows = allRows.concat(batch)
-      if (batch.length < 1000) break
-      offset += 1000
+      if (!batch || !batch.length) break
+      all = all.concat(batch); if (batch.length < 1000) break; off += 1000
     }
-
     const counts = {}, seedCount = {}
-    allRows.forEach(r => {
-      counts[r.cp_id] = (counts[r.cp_id] || 0) + 1
-      if (r.voter_fingerprint && r.voter_fingerprint.startsWith('seed_')) seedCount[r.cp_id] = (seedCount[r.cp_id] || 0) + 1
-    })
-
-    const realVotes = totalVotes - Object.values(seedCount).reduce((a,b) => a+b, 0)
-
-    // ── 概览卡片 ──
+    all.forEach(r => { counts[r.cp_id] = (counts[r.cp_id] || 0) + 1; if (r.voter_fingerprint?.startsWith('seed_')) seedCount[r.cp_id] = (seedCount[r.cp_id] || 0) + 1 })
+    const realVotes = all.length - Object.values(seedCount).reduce((a,b) => a+b, 0)
     let html = '<div style="padding:12px;background:rgba(139,92,246,.06);border-radius:12px;border:1px solid rgba(139,92,246,.15)">'
-    html += '<strong>🌐 服务器总票数：' + totalVotes + '</strong>'
-    html += ' · 真实投票：<strong style="color:#ec4899">' + realVotes + '</strong> 票<br>'
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 16px;margin-top:6px;font-size:13px">'
-    CP_LIST.sort((a,b) => (counts[b.id]||0) - (counts[a.id]||0)).forEach((cp, i) => {
-      const c = counts[cp.id] || 0
-      const s = Math.max(0, c - (seedCount[cp.id] || 0))
-      html += '<div>' + (i+1) + '. ' + cp.name + '</div>'
-      html += '<div style="text-align:right"><strong>' + c + '</strong> 票' + (s > 0 ? ' <span style="color:#ec4899;font-size:11px">(+' + s + ')</span>' : '') + '</div>'
+    html += '<strong>总票数：' + all.length + '</strong> · 真实投票：<strong style="color:#ec4899">' + realVotes + '</strong> 票<br>'
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 14px;margin-top:6px;font-size:12px">'
+    CP_LIST.sort((a,b) => (counts[b.id]||0) - (counts[a.id]||0)).forEach(cp => {
+      const c = counts[cp.id] || 0; const s = Math.max(0, c - (seedCount[cp.id] || 0))
+      html += '<div>' + cp.name.split('×')[0] + '</div><div style="text-align:right"><strong>' + c + '</strong>' + (s > 0 ? ' <span style="color:#ec4899;font-size:10px">(+' + s + ')</span>' : '') + '</div>'
     })
-    html += '</div>'
-    html += '<div style="margin-top:6px;font-size:12px;color:var(--sub)">种子票 ≈ ' + (totalVotes - realVotes) + ' · 真实票 ≈ ' + realVotes + '</div>'
-    html += '</div>'
+    html += '</div><div style="margin-top:4px;font-size:11px;color:var(--sub)">种子票 ≈ ' + (all.length - realVotes) + ' · 真实票 ≈ ' + realVotes + '</div></div>'
 
-    // ── 最近投票记录 ──
-    const recent = allRows.filter(r => !r.voter_fingerprint?.startsWith('seed_')).sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 30)
-    if (recent.length > 0) {
-      html += '<div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:12px">'
-      html += '<strong style="font-size:14px">📋 最近 ' + recent.length + ' 条真实投票</strong>'
-      html += '<div style="margin-top:8px;font-size:12px;display:grid;gap:2px">'
-      html += '<div style="display:grid;grid-template-columns:36px 1fr 48px 56px;gap:4px;padding:3px 0;font-size:10px;color:var(--sub);border-bottom:1px solid rgba(0,0,0,.08);font-weight:600">'
-      html += '<span>时间</span><span>CP</span><span>设备</span><span>来源</span>'
-      html += '</div>'
+    const recent = all.filter(r => !r.voter_fingerprint?.startsWith('seed_')).sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 20)
+    if (recent.length) {
+      html += '<div style="margin-top:12px;padding:12px;background:var(--bg);border-radius:12px"><strong style="font-size:13px">最近 ' + recent.length + ' 条投票</strong>'
+      html += '<div style="margin-top:6px;font-size:11px;display:grid;gap:2px">'
       recent.forEach(r => {
         const cp = CP_LIST.find(c => c.id === parseInt(r.cp_id))
-        const time = new Date(r.created_at).toLocaleString('zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' })
-        const fpShort = r.voter_fingerprint ? r.voter_fingerprint.substring(0, 12) + '...' : '-'
-        const refShort = r.referred_by ? r.referred_by.substring(0, 14) + '...' : '直接'
-        const srcBadge = r.source ? '<span style="background:rgba(139,92,246,.12);padding:1px 6px;border-radius:4px;font-size:10px;color:var(--purple)">' + r.source + '</span>' : '<span style="color:#ccc;font-size:10px">—</span>'
-        html += '<div style="display:grid;grid-template-columns:36px 1fr 48px 56px;gap:4px;padding:3px 0;border-bottom:1px solid rgba(0,0,0,.04);font-size:11px">'
-        html += '<span>' + time + '</span>'
-        html += '<span style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (cp ? cp.name : 'CP#' + r.cp_id) + '</span>'
-        html += '<span style="color:var(--sub)">' + fpShort + '</span>'
-        html += '<span>' + srcBadge + '</span>'
-        html += '</div>'
-      })
-      html += '</div></div>'
-    } else {
-      html += '<div style="margin-top:12px;padding:12px;background:var(--bg);border-radius:12px;font-size:12px;color:var(--sub)">暂无真实投票记录</div>'
-    }
-
-    // ── 引荐链追踪 ──
-    const refMap = {}
-    allRows.filter(r => r.referred_by && !r.voter_fingerprint?.startsWith('seed_')).forEach(r => {
-      const key = r.referred_by
-      if (!refMap[key]) refMap[key] = { count:0, cps:{}, lastTime: null }
-      refMap[key].count++
-      refMap[key].cps[r.cp_id] = (refMap[key].cps[r.cp_id] || 0) + 1
-      if (!refMap[key].lastTime || r.created_at > refMap[key].lastTime) refMap[key].lastTime = r.created_at
-    })
-    const refEntries = Object.entries(refMap).sort((a,b) => b[1].count - a[1].count)
-    if (refEntries.length > 0) {
-      html += '<div style="margin-top:16px;padding:12px;background:rgba(236,72,153,.06);border-radius:12px;border:1px solid rgba(236,72,153,.12)">'
-      html += '<strong style="font-size:14px">🔗 引荐链（谁拉来了谁）</strong>'
-      html += '<div style="margin-top:8px;font-size:12px;display:grid;gap:6px">'
-      refEntries.slice(0, 10).forEach(([refId, data]) => {
-        const cpNames = Object.entries(data.cps).sort((a,b) => b[1]-a[1]).slice(0, 3).map(([cid]) => {
-          const cp = CP_LIST.find(c => c.id === parseInt(cid))
-          return cp ? cp.name.split('×')[0] : ''
-        }).filter(Boolean).join(', ')
-        html += '<div style="padding:6px 8px;background:#fff;border-radius:8px">'
-        html += '<div style="display:flex;justify-content:space-between"><span style="font-weight:600">' + refId.substring(0, 16) + '...</span><span style="color:var(--pink);font-weight:700">拉了 ' + data.count + ' 票</span></div>'
-        html += '<div style="color:var(--sub);font-size:11px;margin-top:2px">投给: ' + cpNames + '</div>'
-        html += '</div>'
+        const t = new Date(r.created_at).toLocaleString('zh-CN', {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})
+        html += '<div style="display:grid;grid-template-columns:36px 1fr 40px;gap:4px;padding:2px 0">'
+        html += '<span>' + t + '</span><span>' + (cp ? cp.name.split('×')[0] : 'CP#' + r.cp_id) + '</span>'
+        html += '<span style="color:var(--sub)">' + (r.source ? r.source : '直接') + '</span></div>'
       })
       html += '</div></div>'
     }
-
     wrap.innerHTML = html
   } catch(e) {
-    wrap.innerHTML = '<div style="padding:12px;background:var(--bg);border-radius:12px;color:var(--sub)">服务器数据加载失败</div>'
+    wrap.innerHTML = '<div style="padding:12px;background:var(--bg);border-radius:12px;color:var(--sub);font-size:12px">加载失败</div>'
   }
 }
 
 function showToast(msg) {
-  const toast = document.getElementById('toast')
-  toast.textContent = msg
-  toast.classList.add('show')
-  clearTimeout(toast._timer)
-  toast._timer = setTimeout(() => toast.classList.remove('show'), 2500)
-}
-
-// ── 拉票力排行榜 ──
-async function renderReferralLeaderboard() {
-  const wrap = document.getElementById('referral-leaderboard')
-  if (!wrap) return
-  try {
-    let allRows = [], offset = 0
-    while (true) {
-      const batch = await supabaseAPI('votes?select=referred_by,voter_fingerprint&limit=1000&offset=' + offset)
-      if (!batch || batch.length === 0) break
-      allRows = allRows.concat(batch)
-      if (batch.length < 1000) break
-      offset += 1000
-    }
-
-    const refCounts = {}
-    allRows.forEach(r => {
-      if (r.referred_by && !r.voter_fingerprint?.startsWith('seed_')) {
-        refCounts[r.referred_by] = (refCounts[r.referred_by] || 0) + 1
-      }
-    })
-
-    const myRefId = 'share_' + deviceFingerprint
-    const myServerCount = refCounts[myRefId] || 0
-
-    const sorted = Object.entries(refCounts)
-      .filter(([k]) => k.startsWith('share_'))
-      .sort((a,b) => b[1] - a[1])
-
-    let html = '<div style="margin-top:20px">'
-    html += '<h3 style="font-size:16px;margin-bottom:12px">🏆 拉票力排行榜</h3>'
-    html += '<p style="font-size:12px;color:var(--sub);margin-bottom:12px">分享链接拉人来投票，排名上升！拉得越多排名越高 👇</p>'
-
-    if (sorted.length === 0) {
-      html += '<p style="color:var(--sub);font-size:13px">暂无拉票数据。快去分享拉票吧！</p>'
-    } else {
-      html += '<div style="display:grid;gap:8px">'
-      sorted.slice(0, 10).forEach(([refId, count], i) => {
-        const isMine = refId === myRefId
-        const displayName = isMine ? '👈 你' : '拉票人 #' + refId.substring(6, 14)
-        html += '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg);border-radius:12px;' + (isMine ? 'border:1px solid var(--pink)' : '') + '">'
-        html += '<span style="font-weight:700;font-size:14px;color:var(--sub);width:24px">' + (i+1) + '</span>'
-        html += '<span style="flex:1;font-size:14px">' + displayName + '</span>'
-        html += '<span style="font-weight:700;color:var(--purple)">' + count + ' 票</span>'
-        html += '</div>'
-      })
-      html += '</div>'
-
-      // 没上榜的用户显示差距激励
-      if (!sorted.some(([k]) => k === myRefId) && sorted.length > 0) {
-        const lastOnBoard = sorted[Math.min(sorted.length - 1, 9)][1]
-        const gap = lastOnBoard - myServerCount + 1
-        if (gap > 0 && myServerCount === 0) {
-          html += '<div style="margin-top:12px;padding:12px 14px;background:linear-gradient(135deg,rgba(236,72,153,.08),rgba(139,92,246,.08));border-radius:12px;text-align:center">'
-          html += '<p style="font-size:14px;font-weight:600;color:var(--text)">你差 <span style="color:var(--pink);font-size:20px">' + gap + '</span> 票就能上榜！快来拉票 👆</p>'
-          html += '</div>'
-        }
-      }
-    }
-    html += '</div>'
-    wrap.innerHTML = html
-  } catch(e) {
-    wrap.innerHTML = '<div style="margin-top:20px;padding:12px;background:var(--bg);border-radius:12px;color:var(--sub);font-size:13px">拉票排行榜加载中...</div>'
-  }
+  const t = document.getElementById('toast')
+  t.textContent = msg; t.classList.add('show')
+  clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.remove('show'), 2200)
 }
 </script>
 </body>
