@@ -80,21 +80,40 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
     <div class="cd" id="prize-cd"></div>
   </div>
 
-  <div class="wheel-wrap">
-    <div class="wt">🎰 每日抽奖</div>
-    <div class="ws" id="wheel-desc">免费抽奖 · 拉人再转</div>
+  <div class="wheel-wrap" style="position:relative;overflow:hidden">
+    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#ec4899,transparent);animation:pulseBar 1.5s infinite"></div>
+    <style>@keyframes pulseBar{0%,100%{opacity:.3}50%{opacity:1}}@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}</style>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <span style="font-size:13px;font-weight:800">🎰 大转盘</span>
+      <span id="urgent-timer" style="font-size:12px;font-weight:700;color:#ec4899;animation:pulse 1s infinite">⏰ 仅剩 23:59:59</span>
+    </div>
+    <div style="background:linear-gradient(135deg,rgba(236,72,153,.08),rgba(251,191,36,.08));border-radius:8px;padding:8px 10px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700">
+        <span>🎯 提现进度</span>
+        <span id="stage-label" style="color:#ec4899">差0.01元提现 ¥399.99</span>
+      </div>
+      <div style="height:8px;background:#f0d5e8;border-radius:99px;margin:4px 0;overflow:hidden">
+        <div id="urgent-progress" style="height:100%;width:99.8%;background:linear-gradient(90deg,#ec4899,#fbbf24,#ec4899);background-size:200% 100%;animation:slide 2s infinite;border-radius:99px"></div>
+        <style>@keyframes slide{0%{background-position:200% 0}100%{background-position:-200% 0}}</style>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--sub)">
+        <span>再拉 <span id="next-stage-count" style="color:#ec4899;font-weight:700">1</span> 人进入下一阶段</span>
+        <span id="fake-users" style="color:#10b981">🔥 已有 1,284 人提现</span>
+      </div>
+    </div>
     <div class="wheel-box">
       <canvas id="wheel-canvas" width="560" height="560"></canvas>
       <div class="pointer"></div>
-      <button class="spin-btn" id="spin-btn" onclick="spin()">抽奖</button>
+      <button class="spin-btn" id="spin-btn" onclick="spin()" style="animation:pulse 1.5s infinite">抽奖</button>
     </div>
-    <div class="wheel-info">
+    <div class="wheel-info" style="margin-top:10px">
       <span class="spins" id="spin-count">剩余 1 次</span>
-      <span class="shares" id="share-count">已拉 0 人</span>
+      <span class="shares" id="share-count" style="cursor:pointer" onclick="copyLink()">已拉 0 人</span>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:6px;font-size:10px;color:var(--sub);justify-content:center">
+      <span id="notif-area" style="color:#ec4899;font-weight:600">🎉 用户 18***22 刚刚抽中5票</span>
     </div>
   </div>
-
-  <div class="winner-tape"><div class="tape-inner" id="tape">🎉 恭喜 用户13***45 抽中5票 🎉 恭喜 用户18***22 抽中3票 🎉 恭喜 用户15***67 抽中2票</div></div>
 
   <div id="extra-show" class="extra-badge" style="display:none"><s id="extra-text">🎯 你有 0 张额外票</s></div>
 
@@ -151,7 +170,7 @@ function init(){
   spins=parseInt(localStorage.glcp_spins||'1')
   refsDone=JSON.parse(localStorage.glcp_refs_done||'[]')
   chkRef()
-  loadVotes().then(()=>{render();drawWheelStatic();updUI();cdTick()})
+  loadVotes().then(()=>{render();drawWheelStatic();updUI();cdTick();initUrgency()})
 }
 init()
 
@@ -268,6 +287,36 @@ function spin(){
 }
 
 function addExtra(n){extra+=n;localStorage.glcp_extra=String(extra);render();updUI()}
+
+// ═══ Urgency Engine ═══
+let stage=0,stages=['差0.01元提现 ¥399.99','差1金币提现 ¥399.99','差1碎片提现','差1福卡提现','差1步提现！']
+function initUrgency(){
+  // Urgent timer (24h countdown)
+  let secs=86400
+  setInterval(()=>{
+    secs--;if(secs<0)secs=0
+    let h=Math.floor(secs/3600),m=Math.floor((secs%3600)/60),s=secs%60
+    document.getElementById('urgent-timer').textContent='⏰ 仅剩 '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')
+  },1000)
+  // Stage progression
+  setInterval(()=>{
+    if(refs>stage*3){stage=Math.min(stage+1,stages.length-1);document.getElementById('stage-label').textContent=stages[stage]}
+    document.getElementById('next-stage-count').textContent=stage*3+3-refs
+  },2000)
+  // Fake winner notifications
+  let users=[],names=['18***22','13***45','15***67','19***01','11***88','16***32','17***55','12***77','14***99','10***23','20***11','21***34','22***56','23***78','24***90']
+  let prizes_notif=['5票','3票','2票','再转一次']
+  setInterval(()=>{
+    if(users.length<20)users.push(names[Math.floor(Math.random()*names.length)])
+    let u=users[Math.floor(Math.random()*users.length)],p=prizes_notif[Math.floor(Math.random()*prizes_notif.length)]
+    document.getElementById('notif-area').textContent='🎉 用户 '+u+' 刚刚抽中'+p
+  },4000)
+}
+// Fake "提现人数" counter
+setInterval(()=>{
+  let n=parseInt(document.getElementById('fake-users').textContent.replace(/[^0-9]/g,'')||'1284')
+  document.getElementById('fake-users').textContent='🔥 已有 '+(n+Math.floor(Math.random()*3+1))+' 人提现'
+},8000)
 
 // ═══ Referral ═══
 function checkRefRewards(){
