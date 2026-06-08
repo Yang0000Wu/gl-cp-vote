@@ -149,6 +149,36 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
   </div>
 </div>
 
+<!-- Red envelope popup (Pinduoduo style) -->
+<div class="red-envelope" id="red-envelope" style="display:none">
+  <div class="re-overlay"></div>
+  <div class="re-box">
+    <div class="re-glow"></div>
+    <div class="re-top">恭喜获得现金红包</div>
+    <div class="re-amount" id="re-amount">¥399.99</div>
+    <div class="re-hint">距提现仅差0.01元</div>
+    <div class="re-btn-wrap" id="re-btn-wrap">
+      <button class="re-btn" onclick="openRedEnvelope()">拆</button>
+    </div>
+    <div class="re-footer">GL CP 投票赛 · 已为你的CP储备奖金</div>
+  </div>
+</div>
+<style>
+.red-envelope{position:fixed;top:0;left:0;width:100%;height:100%;z-index:300;display:flex;justify-content:center;align-items:center;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.re-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7)}
+.re-box{position:relative;width:300px;background:linear-gradient(180deg,#c0392b,#e74c3c,#c0392b);border-radius:16px;padding:30px 24px 20px;text-align:center;box-shadow:0 10px 60px rgba(0,0,0,.5);z-index:1;animation:popIn .4s cubic-bezier(.175,.885,.32,1.275)}
+@keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.re-glow{position:absolute;top:-20px;left:50%;transform:translateX(-50%);width:200px;height:60px;background:radial-gradient(ellipse,rgba(255,215,0,.6),transparent);pointer-events:none}
+.re-top{font-size:14px;color:rgba(255,255,255,.9);margin-bottom:4px;position:relative;z-index:1}
+.re-amount{font-size:48px;font-weight:900;color:#ffd700;text-shadow:0 2px 8px rgba(0,0,0,.3);margin:8px 0;position:relative;z-index:1}
+.re-hint{font-size:12px;color:rgba(255,255,255,.7);margin-bottom:16px;position:relative;z-index:1}
+.re-btn-wrap{position:relative;z-index:1;margin-bottom:12px}
+.re-btn{width:80px;height:80px;border-radius:50%;border:4px solid #ffd700;background:linear-gradient(135deg,#ffd700,#f39c12);color:#c0392b;font-size:28px;font-weight:900;cursor:pointer;box-shadow:0 4px 20px rgba(255,215,0,.4);transition:.2s;animation:pulse 1.2s infinite}
+.re-btn:hover{transform:scale(1.1)}
+.re-footer{font-size:10px;color:rgba(255,255,255,.5);position:relative;z-index:1}
+</style>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -170,7 +200,7 @@ function init(){
   spins=parseInt(localStorage.glcp_spins||'1')
   refsDone=JSON.parse(localStorage.glcp_refs_done||'[]')
   chkRef()
-  loadVotes().then(()=>{render();drawWheelStatic();updUI();cdTick();initUrgency()})
+  loadVotes().then(()=>{render();drawWheelStatic();updUI();cdTick();initUrgency();setTimeout(showRedEnvelope,500)})
 }
 init()
 
@@ -287,6 +317,17 @@ function spin(){
 }
 
 function addExtra(n){extra+=n;localStorage.glcp_extra=String(extra);render();updUI()}
+
+// ═══ Red Envelope (Pinduoduo style) ═══
+function showRedEnvelope(){
+  if(localStorage.getItem('glcp_red_done'))return
+  document.getElementById('red-envelope').style.display='flex'
+}
+function openRedEnvelope(){
+  document.getElementById('red-envelope').style.display='none'
+  localStorage.setItem('glcp_red_done','1')
+  showModal('🧧 ¥399.99','恭喜获得现金红包！再拉1人就能提现！差0.01元即可解锁 🎉','share')
+}
 
 // ═══ Urgency Engine ═══
 let stage=0,stages=['差0.01元提现 ¥399.99','差1金币提现 ¥399.99','差1碎片提现','差1福卡提现','差1步提现！']
