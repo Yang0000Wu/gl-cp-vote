@@ -3,132 +3,130 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes">
-<title>GL CP 竞技场 · 投票赛</title>
+<title>GL CP 竞技场</title>
 <style>
 :root{--bg:#fdf2f8;--card:#fff;--text:#1a1a2e;--sub:#6b7280;--pink:#ec4899;--purple:#8b5cf6;--accent:linear-gradient(135deg,#ec4899,#8b5cf6);--border:#f0d5e8;--shadow:0 4px 24px rgba(236,72,153,.08);--radius:20px}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.6;min-height:100vh}
 body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 20%,rgba(236,72,153,.04) 0%,transparent 50%),radial-gradient(circle at 70% 80%,rgba(139,92,246,.04) 0%,transparent 50%);z-index:-1}
 .container{max-width:480px;margin:0 auto;padding:12px}
-.prize-banner{background:linear-gradient(135deg,#fbbf24,#f59e0b,#ec4899);border-radius:16px;padding:14px;text-align:center;margin-bottom:12px;color:#fff;position:relative;overflow:hidden}
-.prize-banner::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 50%,rgba(255,255,255,.15),transparent 60%);pointer-events:none}
-.prize-banner .prize-title{font-size:15px;font-weight:800;margin-bottom:6px}
-.prize-banner .prize-pool{font-size:13px;font-weight:600;display:flex;justify-content:center;gap:16px}
-.prize-banner .prize-pool span{background:rgba(255,255,255,.2);padding:3px 10px;border-radius:99px}
-.prize-banner .prize-countdown{font-size:12px;margin-top:5px;opacity:.9}
-.comp-banner{background:linear-gradient(135deg,rgba(236,72,153,.1),rgba(139,92,246,.1));border-radius:12px;padding:10px 14px;text-align:center;margin-bottom:12px;font-size:14px;font-weight:600;line-height:1.5;display:none}
-.comp-banner .hl{color:#ec4899;font-size:18px}
-.total-votes{text-align:center;color:var(--sub);font-size:12px;margin-bottom:10px}
-.cp-card{background:var(--card);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;border:2px solid transparent;position:relative}
-.cp-card.voted{border-color:var(--pink)}
-.cp-card .rank{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;background:var(--bg);flex-shrink:0}
-.cp-card .rank.top1{width:46px;height:46px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;font-size:24px;box-shadow:0 0 0 3px rgba(251,191,36,.3)}
-.cp-card .rank.top2{background:linear-gradient(135deg,#c0c0c0,#9ca3af);color:#fff}
-.cp-card .rank.top3{background:linear-gradient(135deg,#d97706,#b45309);color:#fff}
+.prize-banner{background:linear-gradient(135deg,#fbbf24,#f59e0b,#ec4899);border-radius:16px;padding:12px 14px;text-align:center;margin-bottom:12px;color:#fff;position:relative;overflow:hidden}
+.prize-banner::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 50%,rgba(255,255,255,.15),transparent 60%)}
+.prize-banner .t{font-size:14px;font-weight:800;margin-bottom:4px}
+.prize-banner .p{font-size:12px;display:flex;justify-content:center;gap:12px}
+.prize-banner .p s{background:rgba(255,255,255,.2);padding:2px 8px;border-radius:99px}
+.prize-banner .cd{font-size:11px;margin-top:4px;opacity:.9}
+.wheel-wrap{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);text-align:center}
+.wheel-wrap .wt{font-size:15px;font-weight:800;margin-bottom:2px}
+.wheel-wrap .ws{font-size:11px;color:var(--sub);margin-bottom:12px}
+.wheel-box{position:relative;width:280px;height:280px;margin:0 auto}
+.wheel-box canvas{width:280px;height:280px}
+.wheel-box .spin-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:64px;height:64px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:800;cursor:pointer;z-index:10;box-shadow:0 2px 12px rgba(236,72,153,.4);transition:.1s}
+.wheel-box .spin-btn:active{transform:translate(-50%,-50%) scale(.95)}
+.wheel-box .spin-btn:disabled{opacity:.5}
+.wheel-box .pointer{position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-top:20px solid #ec4899;z-index:11;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2))}
+.wheel-info{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:12px;color:var(--sub)}
+.wheel-info .spins{background:var(--bg);padding:4px 12px;border-radius:99px;font-weight:700;color:var(--pink)}
+.wheel-info .shares{background:var(--bg);padding:4px 12px;border-radius:99px;font-weight:700;color:var(--purple)}
+.winner-tape{background:var(--card);border-radius:var(--radius);padding:10px 14px;margin-bottom:12px;box-shadow:var(--shadow);overflow:hidden;height:32px;position:relative}
+.winner-tape .tape-inner{white-space:nowrap;animation:scroll 20s linear infinite;font-size:12px;color:var(--sub);line-height:32px}
+@keyframes scroll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+.cp-card{background:var(--card);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px;border:2px solid transparent}
+.cp-card .rk{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;background:var(--bg);flex-shrink:0}
+.cp-card .rk.t1{width:42px;height:42px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;font-size:22px;box-shadow:0 0 0 3px rgba(251,191,36,.3)}
+.cp-card .rk.t2{background:linear-gradient(135deg,#c0c0c0,#9ca3af);color:#fff}
+.cp-card .rk.t3{background:linear-gradient(135deg,#d97706,#b45309);color:#fff}
 .cp-card .info{flex:1;min-width:0}
-.cp-card .cp-name{font-size:16px;font-weight:700;margin-bottom:1px}
-.cp-card .cp-from{font-size:11px;color:var(--sub)}
-.cp-card .gap-badge{display:inline-block;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:700;margin-top:4px;line-height:1.5}
-.cp-card .gap-badge.leading{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff}
-.cp-card .gap-badge.chasing{background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff}
-.cp-card .votes{text-align:center;min-width:44px}
-.cp-card .votes .num{font-size:20px;font-weight:800;background:var(--accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.cp-card .votes .label{font-size:10px;color:var(--sub)}
-.vote-btn-sm{background:var(--accent);color:#fff;border:none;padding:6px 12px;border-radius:99px;font-size:12px;font-weight:700;cursor:pointer;transition:.15s;flex-shrink:0}
-.vote-btn-sm:hover{opacity:.9;transform:scale(1.05)}
-.vote-btn-sm:disabled{opacity:.4;cursor:default;transform:none}
-.vote-btn-sm.done{background:#9ca3af}
-.progress-section{background:var(--card);border-radius:var(--radius);padding:18px;margin-top:14px;box-shadow:var(--shadow);display:none}
-.progress-section .prog-title{font-size:15px;font-weight:700;margin-bottom:4px;text-align:center}
-.progress-section .prog-desc{font-size:12px;color:var(--sub);text-align:center;margin-bottom:10px}
-.progress-section .prog-bar{height:20px;background:var(--border);border-radius:99px;overflow:hidden;position:relative;margin-bottom:6px}
-.progress-section .prog-bar .fill{height:100%;background:linear-gradient(90deg,#ec4899,#fbbf24);border-radius:99px;transition:width .4s;min-width:4%}
-.progress-section .prog-bar .prog-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.3)}
-.progress-section .prog-steps{display:flex;justify-content:space-between;font-size:10px;color:var(--sub);margin-bottom:12px}
-.progress-section .prog-step{text-align:center;flex:1;position:relative}
-.progress-section .prog-step.done{color:var(--pink);font-weight:700}
-.progress-section .prog-action{text-align:center;margin-top:6px}
-.progress-section .prog-action button{background:var(--accent);color:#fff;border:none;padding:10px 28px;border-radius:99px;font-size:14px;font-weight:700;cursor:pointer;width:100%}
-.progress-section .prog-action button:hover{opacity:.9}
-.progress-section .prog-tip{font-size:11px;color:var(--sub);text-align:center;margin-top:6px}
-.extra-votes-badge{background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:700;display:inline-block;margin-bottom:8px}
-.buy-section{background:var(--card);border-radius:var(--radius);padding:16px;margin-top:10px;box-shadow:var(--shadow);text-align:center}
-.buy-section .buy-title{font-size:14px;font-weight:700;margin-bottom:8px}
-.buy-section .buy-options{display:flex;gap:10px;justify-content:center}
-.buy-section .buy-opt{flex:1;border:2px solid var(--border);border-radius:12px;padding:12px 8px;cursor:pointer;transition:.15s;text-align:center}
-.buy-section .buy-opt:hover{border-color:var(--pink)}
-.buy-section .buy-opt .price{font-size:18px;font-weight:800;background:var(--accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.buy-section .buy-opt .desc{font-size:11px;color:var(--sub);margin-top:4px}
-.footer{text-align:center;padding:16px;color:var(--sub);font-size:11px;margin-top:10px}
+.cp-card .nm{font-size:15px;font-weight:700}
+.cp-card .fr{font-size:10px;color:var(--sub)}
+.cp-card .gb{display:inline-block;padding:1px 8px;border-radius:99px;font-size:10px;font-weight:700;margin-top:2px;line-height:1.5}
+.cp-card .gb.ld{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff}
+.cp-card .gb.ch{background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff}
+.cp-card .vt{text-align:center;min-width:40px}
+.cp-card .vt .n{font-size:18px;font-weight:800;background:var(--accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cp-card .vt .l{font-size:9px;color:var(--sub)}
+.vb{background:var(--accent);color:#fff;border:none;padding:5px 10px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0}
+.vb:hover{opacity:.9;transform:scale(1.05)}
+.vb:disabled{opacity:.4;cursor:default;transform:none}
+.vb.done{background:#9ca3af}
+.extra-badge{text-align:center;margin-bottom:8px}
+.extra-badge s{background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;padding:3px 12px;border-radius:99px;font-size:12px;font-weight:700}
+.buy-wrap{background:var(--card);border-radius:var(--radius);padding:14px;margin-bottom:8px;box-shadow:var(--shadow);text-align:center}
+.buy-wrap .bt{font-size:14px;font-weight:700;margin-bottom:6px}
+.buy-wrap .bo{display:flex;gap:10px;justify-content:center}
+.buy-wrap .bo d{flex:1;border:2px solid var(--border);border-radius:12px;padding:10px 6px;cursor:pointer;transition:.15s}
+.buy-wrap .bo d:hover{border-color:var(--pink)}
+.buy-wrap .bo d .pr{font-size:16px;font-weight:800;background:var(--accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.buy-wrap .bo d .dc{font-size:10px;color:var(--sub);margin-top:2px}
+.buy-wrap .btip{font-size:10px;color:var(--sub);margin-top:5px}
+.total-votes{text-align:center;color:var(--sub);font-size:11px;margin-bottom:8px}
+.footer{text-align:center;padding:14px;color:var(--sub);font-size:11px}
 .footer a{color:var(--purple);text-decoration:none}
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:600;z-index:100;opacity:0;transition:.3s;pointer-events:none}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:10px 20px;border-radius:99px;font-size:12px;font-weight:600;z-index:100;opacity:0;transition:.3s;pointer-events:none}
 .toast.show{opacity:1}
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:200;display:none;justify-content:center;align-items:center;padding:20px}
+.modal-inner{background:#fff;border-radius:24px;padding:24px;max-width:320px;width:100%;text-align:center}
+.modal-inner h3{font-size:18px;margin-bottom:8px}
+.modal-inner p{font-size:13px;color:var(--sub);margin-bottom:14px}
+.modal-inner .mbtn{background:var(--accent);color:#fff;border:none;padding:10px 24px;border-radius:99px;font-size:14px;font-weight:700;cursor:pointer;width:100%}
+.modal-inner .mbtn:hover{opacity:.9}
 </style>
 </head>
 <body>
 <div class="container">
   <div class="prize-banner" id="prize-banner">
-    <div class="prize-title">🏆 第1期投票赛</div>
-    <div class="prize-pool">
-      <span>🥇 ¥1,000</span>
-      <span>🥈 ¥500</span>
-      <span>🥉 ¥300</span>
-    </div>
-    <div class="prize-countdown" id="prize-countdown"></div>
+    <div class="t">🏆 第1期投票赛</div>
+    <div class="p"><s>🥇 ¥1,000</s><s>🥈 ¥500</s><s>🥉 ¥300</s></div>
+    <div class="cd" id="prize-cd"></div>
   </div>
 
-  <div id="comp-banner" class="comp-banner"></div>
+  <div class="wheel-wrap">
+    <div class="wt">🎰 每日抽奖</div>
+    <div class="ws" id="wheel-desc">免费抽奖 · 拉人再转</div>
+    <div class="wheel-box">
+      <canvas id="wheel-canvas" width="560" height="560"></canvas>
+      <div class="pointer"></div>
+      <button class="spin-btn" id="spin-btn" onclick="spin()">抽奖</button>
+    </div>
+    <div class="wheel-info">
+      <span class="spins" id="spin-count">剩余 1 次</span>
+      <span class="shares" id="share-count">已拉 0 人</span>
+    </div>
+  </div>
+
+  <div class="winner-tape"><div class="tape-inner" id="tape">🎉 恭喜 用户13***45 抽中5票 🎉 恭喜 用户18***22 抽中3票 🎉 恭喜 用户15***67 抽中2票</div></div>
+
+  <div id="extra-show" class="extra-badge" style="display:none"><s id="extra-text">🎯 你有 0 张额外票</s></div>
+
   <div class="total-votes" id="total-votes">加载中...</div>
   <div id="cp-list"></div>
 
-  <div id="progress-section" class="progress-section">
-    <div class="prog-title">🎰 你的进度</div>
-    <div class="prog-desc" id="prog-desc">差1人得3票，帮你家CP冲榜！</div>
-    <div class="prog-bar">
-      <div class="fill" id="prog-fill" style="width:10%"></div>
-      <div class="prog-label" id="prog-label">1/10</div>
+  <div class="buy-wrap">
+    <div class="bt">💪 买额外票，助CP反超</div>
+    <div class="bo">
+      <d onclick="buy(5)"><div class="pr">¥5</div><div class="dc">5 票</div></d>
+      <d onclick="buy(12)"><div class="pr">¥10</div><div class="dc">12 票</div></d>
     </div>
-    <div class="prog-steps">
-      <span class="prog-step" data-step="0">拉0人</span>
-      <span class="prog-step" data-step="1">🎁 拉1人</span>
-      <span class="prog-step" data-step="3">🎁 拉3人</span>
-      <span class="prog-step" data-step="5">🎁 拉5人</span>
-      <span class="prog-step" data-step="10">🏆 拉10人</span>
-    </div>
-    <div class="prog-action">
-      <button id="prog-share-btn" onclick="copyRefLink()">📋 复制拉人链接</button>
-    </div>
-    <div class="prog-tip" id="prog-tip">每拉1人你获得3票，可投给你爱的CP</div>
-  </div>
-
-  <div id="extra-votes-area" style="text-align:center;margin-top:10px;display:none">
-    <span class="extra-votes-badge" id="extra-votes-badge">🎯 你有 0 张额外票</span>
-  </div>
-
-  <div id="buy-section" class="buy-section" style="display:none">
-    <div class="buy-title">💪 买额外票，助CP反超</div>
-    <div class="buy-options">
-      <div class="buy-opt" onclick="buyTickets(5)">
-        <div class="price">¥5</div>
-        <div class="desc">5 票</div>
-      </div>
-      <div class="buy-opt" onclick="buyTickets(12)">
-        <div class="price">¥10</div>
-        <div class="desc">12 票</div>
-      </div>
-    </div>
-    <div style="font-size:10px;color:var(--sub);margin-top:6px">支付接入中...</div>
+    <div class="btip">支付接入中，敬请期待</div>
   </div>
 
   <div class="footer">
-    <p>GL CP 竞技场 · 纯属娱乐 · <a href="?data" onclick="showData();return false">📊 数据</a></p>
-    <p style="font-size:10px;margin-top:4px">本活动为CP粉丝娱乐投票赛，购买额外票数为自愿支持行为</p>
+    <p>GL CP 竞技场 · <a href="?data" onclick="showData();return false">📊 数据</a></p>
+    <p style="font-size:9px;margin-top:3px">本活动为CP粉丝娱乐投票赛，购买额外票数为自愿支持行为</p>
   </div>
 
-  <div id="data-panel" style="display:none;background:var(--card);border-radius:var(--radius);padding:20px;margin-top:16px;box-shadow:var(--shadow)">
-    <h3 style="margin-bottom:14px;font-size:15px">📊 数据面板</h3>
-    <div style="display:grid;gap:12px;font-size:13px" id="data-supabase-wrap"></div>
-    <div id="data-local" style="margin-top:10px;padding:10px;background:var(--bg);border-radius:10px;font-size:12px;color:var(--sub)"></div>
+  <div id="data-panel" style="display:none;background:var(--card);border-radius:var(--radius);padding:16px;margin-top:12px;box-shadow:var(--shadow)">
+    <h3 style="font-size:14px;margin-bottom:10px">📊 数据</h3>
+    <div id="data-supabase-wrap" style="font-size:12px"></div>
+    <div id="data-local" style="margin-top:8px;padding:8px;background:var(--bg);border-radius:8px;font-size:11px;color:var(--sub)"></div>
+  </div>
+</div>
+
+<div class="modal" id="result-modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-inner">
+    <h3 id="result-title">🎉</h3>
+    <p id="result-desc">恭喜你获得了！</p>
+    <button class="mbtn" id="result-btn" onclick="closeModal()">好的</button>
   </div>
 </div>
 
@@ -136,343 +134,209 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 
 <script>
 // ═══ Config ═══
-const SUPABASE_URL = 'https://oefzzmflkdoigfahbskc.supabase.co'
-const SUPABASE_KEY = 'sb_publishable_R3EGbB23qba66lweHNbLjQ_gzxxVnqB'
-function supabaseAPI(path, opts = {}) {
-  return fetch(SUPABASE_URL + '/rest/v1/' + path, { ...opts, headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, ...(opts.headers||{}) } }).then(r => r.json()).catch(() => null)
-}
-
-const CP_LIST = [
-  {id:1, name:'忧城 × 千景', from:'《恋语轻唱》', votes:0, color:'#a78bfa'},
-  {id:2, name:'小糸侑 × 七海灯子', from:'《终将成为你》', votes:0, color:'#60a5fa'},
-  {id:3, name:'安达 × 岛村', from:'《安达与岛村》', votes:0, color:'#f472b6'},
-  {id:4, name:'LingLing × Orm', from:'《我们的秘密》', votes:0, color:'#fbbf24'},
-  {id:5, name:'Freen × Becky', from:'《粉红理论》', votes:0, color:'#fb923c'},
-  {id:6, name:'Milk × Love', from:'《地球倾斜23.5度》', votes:0, color:'#34d399'},
-  {id:7, name:'Faye × Yoko', from:'《爱填满空白》', votes:0, color:'#e879f9'},
-  {id:8, name:'Namtan × Film', from:'《冥王星》', votes:0, color:'#38bdf8'},
-  {id:9, name:'席娜 × 美美', from:'《与妳相恋到生命尽头》', votes:0, color:'#f87171'},
-  {id:10, name:'甘露寺蜜璃 × 胡蝶忍', from:'《鬼灭之刃》', votes:0, color:'#fb7185'},
-]
+const SB_URL='https://oefzzmflkdoigfahbskc.supabase.co', SB_KEY='sb_publishable_R3EGbB23qba66lweHNbLjQ_gzxxVnqB'
+const api=(p,o)=>fetch(SB_URL+'/rest/v1/'+p,{...o,headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,...(o?.headers||{})}}).then(r=>r.json()).catch(()=>null)
+const CP=[{id:1,n:'忧城 × 千景',f:'《恋语轻唱》',v:0,c:'#a78bfa'},{id:2,n:'小糸侑 × 七海灯子',f:'《终将成为你》',v:0,c:'#60a5fa'},{id:3,n:'安达 × 岛村',f:'《安达与岛村》',v:0,c:'#f472b6'},{id:4,n:'LingLing × Orm',f:'《我们的秘密》',v:0,c:'#fbbf24'},{id:5,n:'Freen × Becky',f:'《粉红理论》',v:0,c:'#fb923c'},{id:6,n:'Milk × Love',f:'《地球倾斜23.5度》',v:0,c:'#34d399'},{id:7,n:'Faye × Yoko',f:'《爱填满空白》',v:0,c:'#e879f9'},{id:8,n:'Namtan × Film',f:'《冥王星》',v:0,c:'#38bdf8'},{id:9,n:'席娜 × 美美',f:'《与妳相恋到生命尽头》',v:0,c:'#f87171'},{id:10,n:'甘露寺蜜璃 × 胡蝶忍',f:'《鬼灭之刃》',v:0,c:'#fb7185'}]
 
 // ═══ State ═══
-let hasVotedBase = false       // 每日免费票是否已用
-let deviceFingerprint = ''
-let isAdmin = location.search.includes('admin')
-let lastVotedCpId = null
-let extraVotes = 0             // 额外票（拉人+购买）
-let refCount = 0               // 拉了多少人
-let hasVotedAny = false        // 是否投过票（控制进度条显示）
+let fp='',voted=false,admin=location.search.includes('admin'),lastId=null
+let spins=1,extra=0,refs=0,refsDone=[]
+let prizes=['🎯 额外5票','🎯 额外3票','🎯 额外2票','🎟️ 再转一次','👥 拉1人得3次','🎁 1票安慰','💔 差亿点','💰 100票大奖']
 
 // ═══ Init ═══
-async function init() {
-  deviceFingerprint = getFingerprint()
-  loadLocal()
-  checkRef()
-  await loadVotes()
-  render()
-  initCountdown()
-  updateProgressUI()
+function init(){
+  fp=localStorage.glcp_fp||(localStorage.glcp_fp='fp_'+Math.random().toString(36).substr(2,9)+'_'+Date.now().toString(36))
+  extra=parseInt(localStorage.glcp_extra||'0')
+  refs=parseInt(localStorage.glcp_refcount||'0')
+  spins=parseInt(localStorage.glcp_spins||'1')
+  refsDone=JSON.parse(localStorage.glcp_refs_done||'[]')
+  chkRef()
+  loadVotes().then(()=>{render();drawWheelStatic();updUI();cdTick()})
 }
 init()
 
-function getFingerprint() {
-  const stored = localStorage.getItem('glcp_fp')
-  if (!stored) {
-    const fpId = 'fp_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36)
-    localStorage.setItem('glcp_fp', fpId)
-    return fpId
-  }
-  return stored
-}
-
-function loadLocal() {
-  extraVotes = parseInt(localStorage.getItem('glcp_extra') || '0')
-  refCount = parseInt(localStorage.getItem('glcp_refcount') || '0')
-  hasVotedAny = !!localStorage.getItem('glcp_voted_' + deviceFingerprint)
-}
-
-function saveLocal() {
-  localStorage.setItem('glcp_extra', String(extraVotes))
-  localStorage.setItem('glcp_refcount', String(refCount))
-}
-
-// ═══ Referral Check ═══
-function checkRef() {
-  const params = new URLSearchParams(location.search)
-  const ref = params.get('ref')
-  if (ref && ref.startsWith('share_') && ref !== 'share_' + deviceFingerprint) {
-    // This user was referred by someone
-    localStorage.setItem('glcp_referrer', ref)
-    // Track this referral in Supabase for the referrer
-    const refs = JSON.parse(localStorage.getItem('glcp_refs') || '[]')
-    if (!refs.includes(ref)) {
-      refs.push(ref)
-      localStorage.setItem('glcp_refs', JSON.stringify(refs))
-    }
-    showToast('🎯 朋友邀请你来投票！投了你的CP，TA也能得奖励')
+function chkRef(){
+  let r=new URLSearchParams(location.search).get('ref')
+  if(r&&r.startsWith('share_')&&r!=='share_'+fp){
+    localStorage.glcp_referrer=r
+    let a=JSON.parse(localStorage.glcp_refs||'[]')
+    if(!a.includes(r)){a.push(r);localStorage.glcp_refs=JSON.stringify(a)}
   }
 }
 
 // ═══ Data ═══
-async function loadVotes() {
-  try {
-    let all = [], off = 0
-    while (true) {
-      const b = await supabaseAPI('votes?select=cp_id,voter_fingerprint,created_at&limit=1000&offset=' + off)
-      if (!b || !b.length) break
-      all = all.concat(b)
-      if (b.length < 1000) break
-      off += 1000
-    }
-    const counts = {}
-    all.forEach(r => {
-      if (r.voter_fingerprint && r.voter_fingerprint.startsWith('seed_')) return
-      const cid = parseInt(r.cp_id); counts[cid] = (counts[cid] || 0) + 1
-    })
-    CP_LIST.forEach(cp => { cp.votes = counts[cp.id] || 0 })
-
-    const my = all.filter(r => r.voter_fingerprint === deviceFingerprint)
-    if (my.length) {
-      my.sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
-      hasVotedBase = Date.now() < new Date(my[0].created_at).getTime() + 86400000
-      if (hasVotedBase) hasVotedAny = true
-    }
-  } catch(e) {
-    const stored = JSON.parse(localStorage.getItem('glcp_votes') || '{}')
-    CP_LIST.forEach(cp => { cp.votes = stored[cp.id] || 0 })
-    hasVotedBase = !!localStorage.getItem('glcp_voted_' + deviceFingerprint)
+async function loadVotes(){
+  try{
+    let a=[],o=0
+    while(1){let b=await api('votes?select=cp_id,voter_fingerprint,created_at&limit=1000&offset='+o);if(!b||!b.length)break;a=a.concat(b);if(b.length<1000)break;o+=1000}
+    let cn={};a.forEach(r=>{if(r.voter_fingerprint&&r.voter_fingerprint.startsWith('seed_'))return;let c=parseInt(r.cp_id);cn[c]=(cn[c]||0)+1})
+    CP.forEach(c=>{c.v=cn[c.id]||0})
+    let my=a.filter(r=>r.voter_fingerprint===fp)
+    if(my.length){my.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));voted=Date.now()<new Date(my[0].created_at).getTime()+86400000}
+  }catch(e){
+    let s=JSON.parse(localStorage.glcp_votes||'{}');CP.forEach(c=>{c.v=s[c.id]||0})
+    voted=!!localStorage['glcp_voted_'+fp]
   }
-  saveLocal()
 }
 
 // ═══ Render ═══
-function render() {
-  const sorted = [...CP_LIST].sort((a,b) => b.votes - a.votes)
-  const total = sorted.reduce((s,c) => s + c.votes, 0)
-
-  document.getElementById('total-votes').textContent = (total > 0 ? `共 ${total} 票 · ` : '') + `${CP_LIST.length} 对CP参赛`
-
-  const banner = document.getElementById('comp-banner')
-  if (sorted[0] && sorted[1]) {
-    const gap = sorted[0].votes - sorted[1].votes
-    if (gap > 0) banner.innerHTML = '🔥 <span class="hl">' + sorted[0].name.split('×')[0] + '</span> 领先 <span class="hl">' + sorted[1].name.split('×')[0] + '</span> <span class="hl">' + gap + '</span> 票'
-    else banner.innerHTML = '🔥 <span class="hl">' + sorted[0].name.split('×')[0] + '</span> 与 <span class="hl">' + sorted[1].name.split('×')[0] + '</span> 胶着！'
-    banner.style.display = 'block'
-  } else banner.style.display = 'none'
-
-  document.getElementById('cp-list').innerHTML = sorted.map((cp, i) => {
-    const gap = i > 0 ? sorted[i-1].votes - cp.votes : 0
-    const isFirst = i === 0
-    const badgeClass = isFirst ? 'gap-badge leading' : 'gap-badge chasing'
-    const badgeText = isFirst ? (gap > 0 ? '🏆 领先 ' + gap + ' 票' : '🏆 第1') : '🔺 差 ' + gap + ' 票可反超'
-    const freeDisabled = hasVotedBase && !isAdmin
-    const canExtr = extraVotes > 0 && !isAdmin
-    return `<div class="cp-card ${cp.id === lastVotedCpId ? 'voted' : ''}">
-      <div class="rank ${i<3?'top'+(i+1):''}">${i === 0 ? '👑' : (i+1)}</div>
-      <div class="info">
-        <div class="cp-name">${cp.name}</div>
-        <div class="cp-from">${cp.from}</div>
-        <div class="${badgeClass}">${badgeText}</div>
-      </div>
-      <div class="votes">
-        <div class="num">${cp.votes}</div>
-        <div class="label">票</div>
-      </div>
-      <div style="display:flex;gap:4px;flex-direction:column">
-        <button class="vote-btn-sm ${freeDisabled?'done':''}" onclick="voteFree(${cp.id})" ${freeDisabled?'disabled':''}>${freeDisabled?'已投':'投票'}</button>
-        ${canExtr ? `<button class="vote-btn-sm" onclick="voteExtra(${cp.id})" style="background:#8b5cf6">+${extraVotes}</button>` : ''}
-      </div>
-    </div>`
+function render(){
+  let s=[...CP].sort((a,b)=>b.v-a.v),tot=s.reduce((a,c)=>a+c.v,0)
+  document.getElementById('total-votes').textContent=(tot?'共 '+tot+' 票 · ':'')+CP.length+' 对CP'
+  document.getElementById('cp-list').innerHTML=s.map((c,i)=>{
+    let g=i>0?s[i-1].v-c.v:0,bc=i==0?'gb ld':'gb ch',bt=i==0?(g>0?'🏆 领先 '+g+' 票':'🏆 第1'):'🔺 差 '+g+' 票'
+    let vd=voted&&!admin,ex=extra>0&&!admin
+    return '<div class="cp-card'+(c.id===lastId?' style="border-color:var(--pink)"':'')+'">'
+      +'<div class="rk'+(i<3?' t'+(i+1):'')+'">'+(i==0?'👑':(i+1))+'</div>'
+      +'<div class="info"><div class="nm">'+c.n+'</div><div class="fr">'+c.f+'</div><div class="'+bc+'">'+bt+'</div></div>'
+      +'<div class="vt"><div class="n">'+c.v+'</div><div class="l">票</div></div>'
+      +'<div style="display:flex;gap:3px;flex-direction:column">'
+      +'<button class="vb'+(vd?' done':'')+'" onclick="vf('+c.id+')"'+(vd?' disabled':'')+'>'+(vd?'已投':'投票')+'</button>'
+      +(ex?'<button class="vb" onclick="ve('+c.id+')" style="background:#8b5cf6">+'+extra+'</button>':'')
+      +'</div></div>'
   }).join('')
+  let e=document.getElementById('extra-show')
+  if(extra>0){e.style.display='block';document.getElementById('extra-text').textContent='🎯 你有 '+extra+' 张额外票'}
+  else e.style.display='none'
+}
 
-  // Show extra votes area
-  const extraArea = document.getElementById('extra-votes-area')
-  if (extraVotes > 0) {
-    extraArea.style.display = 'block'
-    document.getElementById('extra-votes-badge').textContent = '🎯 你有 ' + extraVotes + ' 张额外票'
-  } else {
-    extraArea.style.display = 'none'
+// ═══ Vote ═══
+async function doVote(id,f){
+  let c=CP.find(x=>x.id===id);if(!c)return
+  c.v++;voted=true;lastId=id;localStorage['glcp_voted_'+fp]='1'
+  fetch(SB_URL+'/rest/v1/votes',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({cp_id:id,voter_fingerprint:admin?'seed_admin_'+f:f})}).catch(()=>{})
+  render();show('投票成功！🎉')
+}
+function vf(id){if(voted&&!admin){show('每天1票，明天再来！');return}doVote(id,fp)}
+function ve(id){if(extra<=0)return;extra--;localStorage.glcp_extra=String(extra);doVote(id,fp)}
+
+// ═══ Wheel ═══
+
+let spinning=false,wheelAngle=0
+function drawWheelStatic(){
+  let c=document.getElementById('wheel-canvas'),ctx=c.getContext('2d'),n=prizes.length,a=Math.PI*2/n
+  let colors=['#ff6b6b','#feca57','#48dbfb','#ff9ff3','#54a0ff','#5f27cd','#01a3a4','#f368e0']
+  ctx.clearRect(0,0,560,560)
+  ctx.save();ctx.translate(280,280);ctx.rotate(wheelAngle);ctx.translate(-280,-280)
+  for(let i=0;i<n;i++){
+    ctx.beginPath();ctx.moveTo(280,280);ctx.arc(280,280,280,i*a,i*a+a);ctx.closePath()
+    ctx.fillStyle=colors[i%colors.length];ctx.fill()
+    ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke()
+    ctx.save();ctx.translate(280,280);ctx.rotate(i*a+a/2)
+    ctx.textAlign='right';ctx.fillStyle='#fff';ctx.font='bold 20px sans-serif'
+    ctx.fillText(prizes[i],260,6);ctx.restore()
   }
-
-  // Show buy section
-  document.getElementById('buy-section').style.display = 'block'
+  ctx.restore()
+  // Center circle
+  ctx.beginPath();ctx.arc(280,280,40,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill()
+  ctx.strokeStyle='#ec4899';ctx.lineWidth=4;ctx.stroke()
 }
+document.getElementById('wheel-canvas').getContext('2d');
+drawWheelStatic()
 
-// ═══ Vote: Free Daily ═══
-async function voteFree(cpId) {
-  if (hasVotedBase && !isAdmin) { showToast('每天限投1票，明天再来！'); return }
-  await doVote(cpId, deviceFingerprint)
-}
+function spin(){
+  if(spinning)return
+  if(spins<=0&&!admin){show('没有抽奖次数了，拉人得更多次数！');return}
+  if(!admin){spins--;localStorage.glcp_spins=String(spins)}
+  spinning=true;document.getElementById('spin-btn').disabled=true
+  let n=prizes.length,a=Math.PI*2/n
+  let targetIdx=Math.floor(Math.random()*3)+3
+  let targetAngle=targetIdx*a+5*Math.PI*2+Math.random()*0.3
+  let startAngle=wheelAngle,endAngle=startAngle+targetAngle
+  let dur=2500,start=performance.now()
 
-// ═══ Vote: Extra ═══
-async function voteExtra(cpId) {
-  if (extraVotes <= 0) { showToast('没有额外票了'); return }
-  extraVotes--
-  saveLocal()
-  await doVote(cpId, deviceFingerprint)
-}
-
-async function doVote(cpId, fp) {
-  const cp = CP_LIST.find(c => c.id === cpId)
-  if (!cp) return
-  cp.votes++
-  hasVotedBase = true
-  hasVotedAny = true
-  lastVotedCpId = cpId
-  localStorage.setItem('glcp_voted_' + deviceFingerprint, '1')
-
-  const voteFp = isAdmin ? 'seed_admin_' + fp : fp
-  fetch(SUPABASE_URL + '/rest/v1/votes', {
-    method: 'POST',
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cp_id: cpId, voter_fingerprint: voteFp })
-  }).catch(() => {})
-
-  render()
-  updateProgressUI()
-  showToast('投票成功！🎉')
-}
-
-// ═══ Extra Votes from Referral ═══
-function addExtraVotes(n) {
-  extraVotes += n
-  saveLocal()
-  render()
-  updateProgressUI()
-  showToast('🎉 获得了 ' + n + ' 张额外票！')
-}
-
-// ═══ Progress Bar ═══
-function updateProgressUI() {
-  const sec = document.getElementById('progress-section')
-  if (hasVotedAny) {
-    sec.style.display = 'block'
-  } else {
-    sec.style.display = 'none'
-    return
+  function anim(now){
+    let t=Math.min((now-start)/dur,1)
+    let ease=1-Math.pow(1-t,3)
+    wheelAngle=startAngle+(endAngle-startAngle)*ease
+    drawWheelStatic()
+    if(t<1)requestAnimationFrame(anim)
+    else done(targetIdx)
   }
-
-  const pct = Math.min(refCount / 10 * 100, 100)
-  document.getElementById('prog-fill').style.width = pct + '%'
-  document.getElementById('prog-label').textContent = refCount + '/10'
-
-  const steps = document.querySelectorAll('.prog-step')
-  steps.forEach(s => {
-    const n = parseInt(s.dataset.step)
-    if (refCount >= n && n > 0) s.classList.add('done')
-    else s.classList.remove('done')
-  })
-
-  // Update description
-  if (refCount >= 10) {
-    document.getElementById('prog-desc').textContent = '🏆 已完成！继续拉人获得更多额外票'
-  } else {
-    document.getElementById('prog-desc').textContent = '已拉 ' + refCount + ' 人，再拉 ' + (10 - refCount) + ' 人获得10张额外票'
+  function done(idx){
+    spinning=false;document.getElementById('spin-btn').disabled=false;updUI()
+    let p=prizes[idx]
+    if(p.includes('5票')){addExtra(5);showModal('🎉 5票！','你抽中了额外5张票，快去投给你爱的CP！')}
+    else if(p.includes('3票')){addExtra(3);showModal('🎉 3票！','你抽中了额外3张票！')}
+    else if(p.includes('2票')){addExtra(2);showModal('🎉 2票！','额外2张票已到账')}
+    else if(p.includes('1票')){addExtra(1);showModal('🎉 1票！','安慰奖，总比没有好')}
+    else if(p.includes('再转')){spins++;localStorage.glcp_spins=String(spins);showModal('🔄 再转一次','运气不错，再来一次！');updUI()}
+    else if(p.includes('拉1人')){showModal('👥 差亿点！','再拉1人投票，你得3次抽奖机会！','share')}
+    else{showModal('💔 差亿点！','隔壁就是100票大奖！再拉1人试试手气','share')}
   }
+  requestAnimationFrame(anim)
 }
 
-// ═══ Share / Referral ═══
-function copyRefLink() {
-  const refId = 'share_' + deviceFingerprint
-  const link = location.origin + location.pathname + '?ref=' + refId
-  navigator.clipboard.writeText(link).then(() => {
-    showToast('🔗 链接已复制！朋友通过这个链接投票，你获得奖励')
-  }).catch(() => showToast('复制失败，请手动复制地址栏'))
-}
+function addExtra(n){extra+=n;localStorage.glcp_extra=String(extra);render();updUI()}
 
-// Called when someone votes through your ref link (from localStorage tracking)
-function checkAndRewardReferrals() {
-  const refs = JSON.parse(localStorage.getItem('glcp_refs') || '[]')
-  const processed = JSON.parse(localStorage.getItem('glcp_refs_processed') || '[]')
-  let newRefs = refs.filter(r => !processed.includes(r))
-  if (newRefs.length > 0) {
-    addExtraVotes(newRefs.length * 3)
-    const allProcessed = [...processed, ...newRefs]
-    localStorage.setItem('glcp_refs_processed', JSON.stringify(allProcessed))
-    refCount += newRefs.length
-    saveLocal()
-    updateProgressUI()
+// ═══ Referral ═══
+function checkRefRewards(){
+  let r=JSON.parse(localStorage.glcp_refs||'[]'),newOnes=r.filter(x=>!refsDone.includes(x))
+  if(newOnes.length){
+    refs+=newOnes.length;localStorage.glcp_refcount=String(refs)
+    refsDone=[...refsDone,...newOnes];localStorage.glcp_refs_done=JSON.stringify(refsDone)
+    let reward=newOnes.length*3
+    spins+=newOnes.length*3;localStorage.glcp_spins=String(spins)
+    addExtra(reward)
+    show('🎉 拉了 '+newOnes.length+' 人！获得 '+reward+' 票 + '+newOnes.length*3+' 次抽奖')
+    updUI()
   }
 }
+setInterval(checkRefRewards,3000)
 
-// ═══ Buy Tickets (UI only - payment coming) ═══
-function buyTickets(count) {
-  showToast('支付功能即将上线，敬请期待！')
+function copyLink(){
+  let l=location.origin+location.pathname+'?ref=share_'+fp
+  navigator.clipboard.writeText(l).then(()=>show('🔗 链接已复制！发到群里朋友投票你拿奖励'))
 }
 
-// ═══ Countdown ═══
-const COMPETITION_START = new Date()
-const COMPETITION_DAYS = 7
-
-function initCountdown() {
-  const el = document.getElementById('prize-countdown')
-  function tick() {
-    const now = new Date()
-    const end = new Date(COMPETITION_START.getTime() + COMPETITION_DAYS * 86400000)
-    const left = end - now
-    if (left <= 0) {
-      el.textContent = '⏰ 本期已结束！'
-      return
-    }
-    const d = Math.floor(left / 86400000)
-    const h = Math.floor((left % 86400000) / 3600000)
-    el.textContent = '⏰ 还剩 ' + d + ' 天 ' + h + ' 小时'
+// ═══ UI ═══
+function updUI(){
+  document.getElementById('spin-count').textContent='剩余 '+spins+' 次'
+  document.getElementById('share-count').textContent='已拉 '+refs+' 人'
+}
+function cdTick(){
+  let e=document.getElementById('prize-cd'),end=new Date(new Date().getTime()+7*86400000)
+  function t(){
+    let l=end-new Date()
+    if(l<=0){e.textContent='⏰ 本期已结束！';return}
+    e.textContent='⏰ 还剩 '+Math.floor(l/86400000)+' 天 '+Math.floor((l%86400000)/3600000)+' 小时'
   }
-  tick()
-  setInterval(tick, 60000)
+  t();setInterval(t,60000)
 }
 
-// ═══ Admin Panel ═══
-function showData() {
-  const panel = document.getElementById('data-panel')
-  if (panel.style.display === 'block') { panel.style.display = 'none'; return }
-  panel.style.display = 'block'
-  const localEl = document.getElementById('data-local')
-  localEl.innerHTML = '<p>设备: ' + deviceFingerprint.substring(0, 20) + '...<br>'
-    + '免费票: ' + (hasVotedBase ? '已用' : '可用') + '<br>'
-    + '额外票: ' + extraVotes + '<br>'
-    + '已拉人数: ' + refCount + '</p>'
-  if (isAdmin) loadSupabaseStats()
-  panel.scrollIntoView({behavior:'smooth'})
-}
+// ═══ Modal ═══
+function showModal(t,d,btn){document.getElementById('result-title').textContent=t;document.getElementById('result-desc').textContent=d;document.getElementById('result-btn').textContent=btn==='share'?'📋 复制拉人链接':'好的';document.getElementById('result-btn').onclick=btn==='share'?()=>{copyLink();closeModal()}:closeModal;document.getElementById('result-modal').style.display='flex'}
+function closeModal(){document.getElementById('result-modal').style.display='none'}
 
-async function loadSupabaseStats() {
-  const wrap = document.getElementById('data-supabase-wrap')
-  try {
-    let all = [], off = 0
-    while (true) {
-      const batch = await fetch(SUPABASE_URL + '/rest/v1/votes?select=cp_id,voter_fingerprint&limit=1000&offset=' + off, {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-      }).then(r => r.json()).catch(() => [])
-      if (!batch || !batch.length) break
-      all = all.concat(batch); if (batch.length < 1000) break; off += 1000
-    }
-    const counts = {}, seedCount = {}
-    all.forEach(r => { counts[r.cp_id] = (counts[r.cp_id] || 0) + 1; if (r.voter_fingerprint?.startsWith('seed_')) seedCount[r.cp_id] = (seedCount[r.cp_id] || 0) + 1 })
-    const realVotes = all.length - Object.values(seedCount).reduce((a,b) => a+b, 0)
-    let html = '<div style="padding:12px;background:rgba(139,92,246,.06);border-radius:12px;border:1px solid rgba(139,92,246,.15)">'
-    html += '<strong>总票数：' + all.length + '</strong> · 真实投票：<strong style="color:#ec4899">' + realVotes + '</strong> 票<br>'
-    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 14px;margin-top:6px;font-size:12px">'
-    CP_LIST.sort((a,b) => (counts[b.id]||0) - (counts[a.id]||0)).forEach(cp => {
-      const c = counts[cp.id] || 0; const s = Math.max(0, c - (seedCount[cp.id] || 0))
-      html += '<div>' + cp.name.split('×')[0] + '</div><div style="text-align:right"><strong>' + c + '</strong>' + (s > 0 ? ' <span style="color:#ec4899;font-size:10px">(+' + s + ')</span>' : '') + '</div>'
-    })
-    html += '</div><div style="margin-top:4px;font-size:11px;color:var(--sub)">种子票 ≈ ' + (all.length - realVotes) + ' · 真实票 ≈ ' + realVotes + '</div></div>'
-    wrap.innerHTML = html
-  } catch(e) {
-    wrap.innerHTML = '<div style="padding:12px;background:var(--bg);border-radius:12px;color:var(--sub);font-size:12px">加载失败</div>'
-  }
-}
+// ═══ Buy ═══
+function buy(n){show('支付即将上线，敬请期待！')}
 
-function showToast(msg) {
-  const t = document.getElementById('toast')
-  t.textContent = msg; t.classList.add('show')
-  clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.remove('show'), 2500)
+// ═══ Data Panel ═══
+function showData(){
+  let p=document.getElementById('data-panel')
+  if(p.style.display==='block'){p.style.display='none';return}
+  p.style.display='block'
+  let l=document.getElementById('data-local')
+  l.innerHTML='设备: '+fp.substr(0,20)+'...<br>状态: '+(voted?'已投票':'未投票')+'<br>额外票: '+extra+'<br>抽奖: '+spins+' 次<br>拉人: '+refs
+  if(admin)loadSS()
+  p.scrollIntoView({behavior:'smooth'})
 }
-
-// Poll for referral updates every 5 seconds
-setInterval(checkAndRewardReferrals, 5000)
+async function loadSS(){
+  let w=document.getElementById('data-supabase-wrap')
+  try{
+    let a=[],o=0
+    while(1){let b=await fetch(SB_URL+'/rest/v1/votes?select=cp_id,voter_fingerprint&limit=1000&offset='+o,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(r=>r.json()).catch(()=>[]);if(!b||!b.length)break;a=a.concat(b);if(b.length<1000)break;o+=1000}
+    let cn={},sc={};a.forEach(r=>{cn[r.cp_id]=(cn[r.cp_id]||0)+1;if(r.voter_fingerprint?.startsWith('seed_'))sc[r.cp_id]=(sc[r.cp_id]||0)+1})
+    let rv=a.length-Object.values(sc).reduce((a,b)=>a+b,0)
+    let h='<div style="padding:10px;background:rgba(139,92,246,.06);border-radius:10px">'
+    h+='<strong>总票数：'+a.length+'</strong> · 真实：<strong style="color:#ec4899">'+rv+'</strong><br>'
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;margin-top:4px;font-size:11px">'
+    CP.sort((a,b)=>(cn[b.id]||0)-(cn[a.id]||0)).forEach(c=>{let ct=cn[c.id]||0,cs=Math.max(0,ct-(sc[c.id]||0));h+='<div>'+c.n.split('×')[0]+'</div><div style="text-align:right"><strong>'+ct+'</strong>'+(cs?' <span style="color:#ec4899;font-size:9px">(+'+cs+')</span>':'')+'</div>'})
+    h+='</div><div style="margin-top:3px;font-size:10px;color:var(--sub)">种子票 ≈ '+(a.length-rv)+' · 真实 ≈ '+rv+'</div></div>'
+    w.innerHTML=h
+  }catch(e){w.innerHTML='<div style="padding:8px;background:var(--bg);border-radius:8px;font-size:11px;color:var(--sub)">加载失败</div>'}
+}
+function show(m){let t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),2500)}
 </script>
 </body>
 </html>
