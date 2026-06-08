@@ -3,45 +3,63 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes">
-<title>GL CP 战力排行</title>
+<title>GL CP 竞技场 · 投票赛</title>
 <style>
 :root{--bg:#fdf2f8;--card:#fff;--text:#1a1a2e;--sub:#6b7280;--pink:#ec4899;--purple:#8b5cf6;--accent:linear-gradient(135deg,#ec4899,#8b5cf6);--border:#f0d5e8;--shadow:0 4px 24px rgba(236,72,153,.08);--radius:20px}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.6;min-height:100vh;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.6;min-height:100vh}
 body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 20%,rgba(236,72,153,.04) 0%,transparent 50%),radial-gradient(circle at 70% 80%,rgba(139,92,246,.04) 0%,transparent 50%);z-index:-1}
-.container{max-width:480px;margin:0 auto;padding:16px}
-.header{text-align:center;padding:24px 16px 12px}
-.header h1{font-size:26px;font-weight:800;background:var(--accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:2px}
-.header .sub{font-size:13px;color:var(--sub)}
-.cp-card{background:var(--card);border-radius:var(--radius);padding:16px 20px;margin-bottom:12px;box-shadow:var(--shadow);display:flex;align-items:center;gap:14px;border:2px solid transparent;position:relative}
+.container{max-width:480px;margin:0 auto;padding:12px}
+.prize-banner{background:linear-gradient(135deg,#fbbf24,#f59e0b,#ec4899);border-radius:16px;padding:14px;text-align:center;margin-bottom:12px;color:#fff;position:relative;overflow:hidden}
+.prize-banner::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 50%,rgba(255,255,255,.15),transparent 60%);pointer-events:none}
+.prize-banner .prize-title{font-size:15px;font-weight:800;margin-bottom:6px}
+.prize-banner .prize-pool{font-size:13px;font-weight:600;display:flex;justify-content:center;gap:16px}
+.prize-banner .prize-pool span{background:rgba(255,255,255,.2);padding:3px 10px;border-radius:99px}
+.prize-banner .prize-countdown{font-size:12px;margin-top:5px;opacity:.9}
+.comp-banner{background:linear-gradient(135deg,rgba(236,72,153,.1),rgba(139,92,246,.1));border-radius:12px;padding:10px 14px;text-align:center;margin-bottom:12px;font-size:14px;font-weight:600;line-height:1.5;display:none}
+.comp-banner .hl{color:#ec4899;font-size:18px}
+.total-votes{text-align:center;color:var(--sub);font-size:12px;margin-bottom:10px}
+.cp-card{background:var(--card);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;border:2px solid transparent;position:relative}
 .cp-card.voted{border-color:var(--pink)}
-.cp-card .rank{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;background:var(--bg);flex-shrink:0}
-.cp-card .rank.top1{width:48px;height:48px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;font-size:26px;box-shadow:0 0 0 3px rgba(251,191,36,.3)}
+.cp-card .rank{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;background:var(--bg);flex-shrink:0}
+.cp-card .rank.top1{width:46px;height:46px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;font-size:24px;box-shadow:0 0 0 3px rgba(251,191,36,.3)}
 .cp-card .rank.top2{background:linear-gradient(135deg,#c0c0c0,#9ca3af);color:#fff}
 .cp-card .rank.top3{background:linear-gradient(135deg,#d97706,#b45309);color:#fff}
 .cp-card .info{flex:1;min-width:0}
-.cp-card .cp-name{font-size:17px;font-weight:700;margin-bottom:1px}
+.cp-card .cp-name{font-size:16px;font-weight:700;margin-bottom:1px}
 .cp-card .cp-from{font-size:11px;color:var(--sub)}
-.cp-card .gap-badge{display:inline-block;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:700;margin-top:4px;line-height:1.5}
+.cp-card .gap-badge{display:inline-block;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:700;margin-top:4px;line-height:1.5}
 .cp-card .gap-badge.leading{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff}
 .cp-card .gap-badge.chasing{background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff}
-.cp-card .votes{text-align:center;min-width:50px}
-.cp-card .votes .num{font-size:22px;font-weight:800;background:var(--accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cp-card .votes{text-align:center;min-width:44px}
+.cp-card .votes .num{font-size:20px;font-weight:800;background:var(--accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .cp-card .votes .label{font-size:10px;color:var(--sub)}
-.vote-btn-sm{background:var(--accent);color:#fff;border:none;padding:6px 14px;border-radius:99px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;flex-shrink:0;margin-left:4px}
+.vote-btn-sm{background:var(--accent);color:#fff;border:none;padding:6px 12px;border-radius:99px;font-size:12px;font-weight:700;cursor:pointer;transition:.15s;flex-shrink:0}
 .vote-btn-sm:hover{opacity:.9;transform:scale(1.05)}
 .vote-btn-sm:disabled{opacity:.4;cursor:default;transform:none}
 .vote-btn-sm.done{background:#9ca3af}
-.comp-banner{background:linear-gradient(135deg,rgba(236,72,153,.1),rgba(139,92,246,.1));border-radius:12px;padding:10px 14px;text-align:center;margin-bottom:14px;font-size:14px;font-weight:600;line-height:1.5}
-.comp-banner .hl{color:#ec4899;font-size:18px}
-.total-votes{text-align:center;color:var(--sub);font-size:13px;margin:6px 0 14px}
-.card-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:200;display:none;justify-content:center;align-items:center;padding:20px}
-.card-box{background:#fff;border-radius:24px;padding:24px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-.card-box img{width:100%;border-radius:16px;margin-bottom:12px}
-.card-box .dl-btn{background:var(--accent);color:#fff;border:none;padding:12px 24px;border-radius:99px;font-size:15px;font-weight:700;cursor:pointer;width:100%;margin-top:4px}
-.card-box .dl-btn:hover{opacity:.9;transform:scale(1.02)}
-.card-box .close-btn{background:transparent;color:var(--sub);border:none;padding:10px;font-size:13px;cursor:pointer;margin-top:6px;width:100%}
-.footer{text-align:center;padding:20px 16px;color:var(--sub);font-size:12px}
+.progress-section{background:var(--card);border-radius:var(--radius);padding:18px;margin-top:14px;box-shadow:var(--shadow);display:none}
+.progress-section .prog-title{font-size:15px;font-weight:700;margin-bottom:4px;text-align:center}
+.progress-section .prog-desc{font-size:12px;color:var(--sub);text-align:center;margin-bottom:10px}
+.progress-section .prog-bar{height:20px;background:var(--border);border-radius:99px;overflow:hidden;position:relative;margin-bottom:6px}
+.progress-section .prog-bar .fill{height:100%;background:linear-gradient(90deg,#ec4899,#fbbf24);border-radius:99px;transition:width .4s;min-width:4%}
+.progress-section .prog-bar .prog-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.3)}
+.progress-section .prog-steps{display:flex;justify-content:space-between;font-size:10px;color:var(--sub);margin-bottom:12px}
+.progress-section .prog-step{text-align:center;flex:1;position:relative}
+.progress-section .prog-step.done{color:var(--pink);font-weight:700}
+.progress-section .prog-action{text-align:center;margin-top:6px}
+.progress-section .prog-action button{background:var(--accent);color:#fff;border:none;padding:10px 28px;border-radius:99px;font-size:14px;font-weight:700;cursor:pointer;width:100%}
+.progress-section .prog-action button:hover{opacity:.9}
+.progress-section .prog-tip{font-size:11px;color:var(--sub);text-align:center;margin-top:6px}
+.extra-votes-badge{background:linear-gradient(135deg,#ec4899,#8b5cf6);color:#fff;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:700;display:inline-block;margin-bottom:8px}
+.buy-section{background:var(--card);border-radius:var(--radius);padding:16px;margin-top:10px;box-shadow:var(--shadow);text-align:center}
+.buy-section .buy-title{font-size:14px;font-weight:700;margin-bottom:8px}
+.buy-section .buy-options{display:flex;gap:10px;justify-content:center}
+.buy-section .buy-opt{flex:1;border:2px solid var(--border);border-radius:12px;padding:12px 8px;cursor:pointer;transition:.15s;text-align:center}
+.buy-section .buy-opt:hover{border-color:var(--pink)}
+.buy-section .buy-opt .price{font-size:18px;font-weight:800;background:var(--accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.buy-section .buy-opt .desc{font-size:11px;color:var(--sub);margin-top:4px}
+.footer{text-align:center;padding:16px;color:var(--sub);font-size:11px;margin-top:10px}
 .footer a{color:var(--purple);text-decoration:none}
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:600;z-index:100;opacity:0;transition:.3s;pointer-events:none}
 .toast.show{opacity:1}
@@ -49,39 +67,68 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 </head>
 <body>
 <div class="container">
-  <div class="header">
-    <h1>GL CP 战力排行</h1>
-    <p class="sub">实时排名 · 每日一票</p>
+  <div class="prize-banner" id="prize-banner">
+    <div class="prize-title">🏆 第1期投票赛</div>
+    <div class="prize-pool">
+      <span>🥇 ¥1,000</span>
+      <span>🥈 ¥500</span>
+      <span>🥉 ¥300</span>
+    </div>
+    <div class="prize-countdown" id="prize-countdown"></div>
   </div>
 
-  <div id="comp-banner" class="comp-banner" style="display:none"></div>
+  <div id="comp-banner" class="comp-banner"></div>
   <div class="total-votes" id="total-votes">加载中...</div>
   <div id="cp-list"></div>
 
+  <div id="progress-section" class="progress-section">
+    <div class="prog-title">🎰 你的进度</div>
+    <div class="prog-desc" id="prog-desc">差1人得3票，帮你家CP冲榜！</div>
+    <div class="prog-bar">
+      <div class="fill" id="prog-fill" style="width:10%"></div>
+      <div class="prog-label" id="prog-label">1/10</div>
+    </div>
+    <div class="prog-steps">
+      <span class="prog-step" data-step="0">拉0人</span>
+      <span class="prog-step" data-step="1">🎁 拉1人</span>
+      <span class="prog-step" data-step="3">🎁 拉3人</span>
+      <span class="prog-step" data-step="5">🎁 拉5人</span>
+      <span class="prog-step" data-step="10">🏆 拉10人</span>
+    </div>
+    <div class="prog-action">
+      <button id="prog-share-btn" onclick="copyRefLink()">📋 复制拉人链接</button>
+    </div>
+    <div class="prog-tip" id="prog-tip">每拉1人你获得3票，可投给你爱的CP</div>
+  </div>
+
+  <div id="extra-votes-area" style="text-align:center;margin-top:10px;display:none">
+    <span class="extra-votes-badge" id="extra-votes-badge">🎯 你有 0 张额外票</span>
+  </div>
+
+  <div id="buy-section" class="buy-section" style="display:none">
+    <div class="buy-title">💪 买额外票，助CP反超</div>
+    <div class="buy-options">
+      <div class="buy-opt" onclick="buyTickets(5)">
+        <div class="price">¥5</div>
+        <div class="desc">5 票</div>
+      </div>
+      <div class="buy-opt" onclick="buyTickets(12)">
+        <div class="price">¥10</div>
+        <div class="desc">12 票</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--sub);margin-top:6px">支付接入中...</div>
+  </div>
+
   <div class="footer">
-    <p>GL CP Vote · <a href="?data" onclick="showData();return false">📊 数据</a></p>
+    <p>GL CP 竞技场 · 纯属娱乐 · <a href="?data" onclick="showData();return false">📊 数据</a></p>
+    <p style="font-size:10px;margin-top:4px">本活动为CP粉丝娱乐投票赛，购买额外票数为自愿支持行为</p>
   </div>
 
   <div id="data-panel" style="display:none;background:var(--card);border-radius:var(--radius);padding:20px;margin-top:16px;box-shadow:var(--shadow)">
     <h3 style="margin-bottom:14px;font-size:15px">📊 数据面板</h3>
     <div style="display:grid;gap:12px;font-size:13px" id="data-supabase-wrap"></div>
-    <div style="display:grid;gap:10px;font-size:13px;margin-top:10px">
-      <div style="padding:10px;background:var(--bg);border-radius:10px;font-size:12px;color:var(--sub)">
-        <p>设备: <code id="data-fp"></code></p>
-        <p>状态: <span id="data-voted"></span></p>
-        <p>投给了: <span id="data-myvote"></span></p>
-        <p style="margin-top:6px" id="data-hint"></p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="card-overlay" id="card-overlay" onclick="if(event.target===this)closeCard()">
-  <div class="card-box">
-    <img id="card-img" alt="战力卡">
-    <button class="dl-btn" id="card-dl-btn" onclick="downloadCard()">⬇️ 保存战力卡</button>
-    <p style="font-size:11px;color:var(--sub);margin-top:6px">长按图片也可以保存</p>
-    <button class="close-btn" onclick="closeCard()">关闭</button>
+    <div id="data-local" style="margin-top:10px;padding:10px;background:var(--bg);border-radius:10px;font-size:12px;color:var(--sub)"></div>
   </div>
 </div>
 
@@ -108,15 +155,24 @@ const CP_LIST = [
   {id:10, name:'甘露寺蜜璃 × 胡蝶忍', from:'《鬼灭之刃》', votes:0, color:'#fb7185'},
 ]
 
-let hasVoted = false
+// ═══ State ═══
+let hasVotedBase = false       // 每日免费票是否已用
 let deviceFingerprint = ''
 let isAdmin = location.search.includes('admin')
+let lastVotedCpId = null
+let extraVotes = 0             // 额外票（拉人+购买）
+let refCount = 0               // 拉了多少人
+let hasVotedAny = false        // 是否投过票（控制进度条显示）
 
 // ═══ Init ═══
 async function init() {
   deviceFingerprint = getFingerprint()
+  loadLocal()
+  checkRef()
   await loadVotes()
   render()
+  initCountdown()
+  updateProgressUI()
 }
 init()
 
@@ -128,6 +184,34 @@ function getFingerprint() {
     return fpId
   }
   return stored
+}
+
+function loadLocal() {
+  extraVotes = parseInt(localStorage.getItem('glcp_extra') || '0')
+  refCount = parseInt(localStorage.getItem('glcp_refcount') || '0')
+  hasVotedAny = !!localStorage.getItem('glcp_voted_' + deviceFingerprint)
+}
+
+function saveLocal() {
+  localStorage.setItem('glcp_extra', String(extraVotes))
+  localStorage.setItem('glcp_refcount', String(refCount))
+}
+
+// ═══ Referral Check ═══
+function checkRef() {
+  const params = new URLSearchParams(location.search)
+  const ref = params.get('ref')
+  if (ref && ref.startsWith('share_') && ref !== 'share_' + deviceFingerprint) {
+    // This user was referred by someone
+    localStorage.setItem('glcp_referrer', ref)
+    // Track this referral in Supabase for the referrer
+    const refs = JSON.parse(localStorage.getItem('glcp_refs') || '[]')
+    if (!refs.includes(ref)) {
+      refs.push(ref)
+      localStorage.setItem('glcp_refs', JSON.stringify(refs))
+    }
+    showToast('🎯 朋友邀请你来投票！投了你的CP，TA也能得奖励')
+  }
 }
 
 // ═══ Data ═══
@@ -151,24 +235,24 @@ async function loadVotes() {
     const my = all.filter(r => r.voter_fingerprint === deviceFingerprint)
     if (my.length) {
       my.sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
-      if (Date.now() < new Date(my[0].created_at).getTime() + 86400000) hasVoted = true
+      hasVotedBase = Date.now() < new Date(my[0].created_at).getTime() + 86400000
+      if (hasVotedBase) hasVotedAny = true
     }
   } catch(e) {
     const stored = JSON.parse(localStorage.getItem('glcp_votes') || '{}')
     CP_LIST.forEach(cp => { cp.votes = stored[cp.id] || 0 })
-    hasVoted = !!localStorage.getItem('glcp_voted_' + deviceFingerprint)
+    hasVotedBase = !!localStorage.getItem('glcp_voted_' + deviceFingerprint)
   }
+  saveLocal()
 }
 
 // ═══ Render ═══
 function render() {
   const sorted = [...CP_LIST].sort((a,b) => b.votes - a.votes)
   const total = sorted.reduce((s,c) => s + c.votes, 0)
-  const max = sorted[0]?.votes || 1
 
   document.getElementById('total-votes').textContent = (total > 0 ? `共 ${total} 票 · ` : '') + `${CP_LIST.length} 对CP参赛`
 
-  // 竞争条
   const banner = document.getElementById('comp-banner')
   if (sorted[0] && sorted[1]) {
     const gap = sorted[0].votes - sorted[1].votes
@@ -182,9 +266,8 @@ function render() {
     const isFirst = i === 0
     const badgeClass = isFirst ? 'gap-badge leading' : 'gap-badge chasing'
     const badgeText = isFirst ? (gap > 0 ? '🏆 领先 ' + gap + ' 票' : '🏆 第1') : '🔺 差 ' + gap + ' 票可反超'
-    const btnDisabled = hasVoted && !isAdmin
-    const btnText = btnDisabled ? '已投' : (isFirst ? '保持第1' : '差' + gap + '反超')
-    const btnClass = btnDisabled ? 'vote-btn-sm done' : 'vote-btn-sm'
+    const freeDisabled = hasVotedBase && !isAdmin
+    const canExtr = extraVotes > 0 && !isAdmin
     return `<div class="cp-card ${cp.id === lastVotedCpId ? 'voted' : ''}">
       <div class="rank ${i<3?'top'+(i+1):''}">${i === 0 ? '👑' : (i+1)}</div>
       <div class="info">
@@ -196,106 +279,148 @@ function render() {
         <div class="num">${cp.votes}</div>
         <div class="label">票</div>
       </div>
-      <button class="${btnClass}" onclick="vote(${cp.id})" ${btnDisabled ? 'disabled' : ''}>${btnText}</button>
+      <div style="display:flex;gap:4px;flex-direction:column">
+        <button class="vote-btn-sm ${freeDisabled?'done':''}" onclick="voteFree(${cp.id})" ${freeDisabled?'disabled':''}>${freeDisabled?'已投':'投票'}</button>
+        ${canExtr ? `<button class="vote-btn-sm" onclick="voteExtra(${cp.id})" style="background:#8b5cf6">+${extraVotes}</button>` : ''}
+      </div>
     </div>`
   }).join('')
+
+  // Show extra votes area
+  const extraArea = document.getElementById('extra-votes-area')
+  if (extraVotes > 0) {
+    extraArea.style.display = 'block'
+    document.getElementById('extra-votes-badge').textContent = '🎯 你有 ' + extraVotes + ' 张额外票'
+  } else {
+    extraArea.style.display = 'none'
+  }
+
+  // Show buy section
+  document.getElementById('buy-section').style.display = 'block'
 }
 
-// ═══ Vote ═══
-let lastVotedCpId = null
+// ═══ Vote: Free Daily ═══
+async function voteFree(cpId) {
+  if (hasVotedBase && !isAdmin) { showToast('每天限投1票，明天再来！'); return }
+  await doVote(cpId, deviceFingerprint)
+}
 
-async function vote(cpId) {
-  if (hasVoted && !isAdmin) { showToast('每天限投1票，明天再来！'); return }
+// ═══ Vote: Extra ═══
+async function voteExtra(cpId) {
+  if (extraVotes <= 0) { showToast('没有额外票了'); return }
+  extraVotes--
+  saveLocal()
+  await doVote(cpId, deviceFingerprint)
+}
+
+async function doVote(cpId, fp) {
   const cp = CP_LIST.find(c => c.id === cpId)
   if (!cp) return
   cp.votes++
-  hasVoted = true
+  hasVotedBase = true
+  hasVotedAny = true
   lastVotedCpId = cpId
   localStorage.setItem('glcp_voted_' + deviceFingerprint, '1')
-  localStorage.setItem('glcp_myvote', String(cpId))
 
-  const fp = isAdmin ? 'seed_admin_' + deviceFingerprint : deviceFingerprint
+  const voteFp = isAdmin ? 'seed_admin_' + fp : fp
   fetch(SUPABASE_URL + '/rest/v1/votes', {
     method: 'POST',
     headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cp_id: cpId, voter_fingerprint: fp })
+    body: JSON.stringify({ cp_id: cpId, voter_fingerprint: voteFp })
   }).catch(() => {})
 
   render()
-  showCard(cp)
-}
-
-// ═══ 战力卡 ═══
-let lastCardUrl = ''
-
-function showCard(cp) {
-  const w = 700, h = 1000
-  const canvas = document.createElement('canvas')
-  canvas.width = w; canvas.height = h
-  const ctx = canvas.getContext('2d')
-
-  // 背景渐变
-  const grad = ctx.createLinearGradient(0, 0, w, h)
-  grad.addColorStop(0, cp.color + 'cc'); grad.addColorStop(0.5, '#fff'); grad.addColorStop(1, cp.color + '88')
-  ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h)
-
-  // CP名
-  ctx.textAlign = 'center'
-  const parts = cp.name.split('×')
-  ctx.fillStyle = '#1a1a2e'
-  if (parts.length === 2) {
-    ctx.font = 'bold 64px system-ui,sans-serif'; ctx.fillText(parts[0].trim(), w/2, 200)
-    ctx.font = '36px system-ui,sans-serif'; ctx.fillStyle = '#9ca3af'; ctx.fillText('×', w/2, 280)
-    ctx.font = 'bold 64px system-ui,sans-serif'; ctx.fillStyle = '#1a1a2e'; ctx.fillText(parts[1].trim(), w/2, 360)
-  } else {
-    ctx.font = 'bold 72px system-ui,sans-serif'; ctx.fillText(cp.name, w/2, 280)
-  }
-
-  // 出处
-  ctx.font = '28px system-ui,sans-serif'; ctx.fillStyle = '#6b7280'
-  ctx.fillText(cp.from, w/2, 440)
-
-  // 票数（大号）
-  const rank = [...CP_LIST].sort((a,b) => b.votes - a.votes).findIndex(c => c.id === cp.id) + 1
-  ctx.font = 'bold 140px system-ui,sans-serif'
-  ctx.fillStyle = cp.color
-  ctx.fillText(cp.votes + ' 票', w/2, 620)
-
-  // 排名
-  ctx.font = 'bold 48px system-ui,sans-serif'
-  ctx.fillStyle = cp.color
-  const total = CP_LIST.reduce((s,c) => s + c.votes, 0)
-  ctx.fillText('第 ' + rank + ' 名', w/2, 710)
-
-  // 差距
-  const sorted = [...CP_LIST].sort((a,b) => b.votes - a.votes)
-  const gap = rank > 1 ? sorted[rank-2].votes - cp.votes : sorted[0].votes - (sorted[1]?.votes || 0)
-  ctx.font = '32px system-ui,sans-serif'
-  ctx.fillStyle = '#6b7280'
-  if (rank === 1 && gap > 0) ctx.fillText('领先 第2名 ' + gap + ' 票', w/2, 780)
-  else if (rank === 1) ctx.fillText('断层第一！', w/2, 780)
-  else ctx.fillText('差 ' + gap + ' 票反超 ' + sorted[rank-2].name.split('×')[0].trim(), w/2, 780)
-
-  // 底部水印
-  ctx.font = '18px system-ui,sans-serif'; ctx.fillStyle = '#c0c0c0'
-  ctx.fillText('GL CP Vote · yang0000wu.github.io/gl-cp-vote', w/2, h - 40)
-
-  lastCardUrl = canvas.toDataURL('image/png')
-  document.getElementById('card-img').src = lastCardUrl
-  document.getElementById('card-overlay').style.display = 'flex'
+  updateProgressUI()
   showToast('投票成功！🎉')
 }
 
-function downloadCard() {
-  if (!lastCardUrl) return
-  const a = document.createElement('a')
-  a.href = lastCardUrl
-  a.download = 'CP_' + Date.now() + '.png'
-  a.click()
+// ═══ Extra Votes from Referral ═══
+function addExtraVotes(n) {
+  extraVotes += n
+  saveLocal()
+  render()
+  updateProgressUI()
+  showToast('🎉 获得了 ' + n + ' 张额外票！')
 }
 
-function closeCard() {
-  document.getElementById('card-overlay').style.display = 'none'
+// ═══ Progress Bar ═══
+function updateProgressUI() {
+  const sec = document.getElementById('progress-section')
+  if (hasVotedAny) {
+    sec.style.display = 'block'
+  } else {
+    sec.style.display = 'none'
+    return
+  }
+
+  const pct = Math.min(refCount / 10 * 100, 100)
+  document.getElementById('prog-fill').style.width = pct + '%'
+  document.getElementById('prog-label').textContent = refCount + '/10'
+
+  const steps = document.querySelectorAll('.prog-step')
+  steps.forEach(s => {
+    const n = parseInt(s.dataset.step)
+    if (refCount >= n && n > 0) s.classList.add('done')
+    else s.classList.remove('done')
+  })
+
+  // Update description
+  if (refCount >= 10) {
+    document.getElementById('prog-desc').textContent = '🏆 已完成！继续拉人获得更多额外票'
+  } else {
+    document.getElementById('prog-desc').textContent = '已拉 ' + refCount + ' 人，再拉 ' + (10 - refCount) + ' 人获得10张额外票'
+  }
+}
+
+// ═══ Share / Referral ═══
+function copyRefLink() {
+  const refId = 'share_' + deviceFingerprint
+  const link = location.origin + location.pathname + '?ref=' + refId
+  navigator.clipboard.writeText(link).then(() => {
+    showToast('🔗 链接已复制！朋友通过这个链接投票，你获得奖励')
+  }).catch(() => showToast('复制失败，请手动复制地址栏'))
+}
+
+// Called when someone votes through your ref link (from localStorage tracking)
+function checkAndRewardReferrals() {
+  const refs = JSON.parse(localStorage.getItem('glcp_refs') || '[]')
+  const processed = JSON.parse(localStorage.getItem('glcp_refs_processed') || '[]')
+  let newRefs = refs.filter(r => !processed.includes(r))
+  if (newRefs.length > 0) {
+    addExtraVotes(newRefs.length * 3)
+    const allProcessed = [...processed, ...newRefs]
+    localStorage.setItem('glcp_refs_processed', JSON.stringify(allProcessed))
+    refCount += newRefs.length
+    saveLocal()
+    updateProgressUI()
+  }
+}
+
+// ═══ Buy Tickets (UI only - payment coming) ═══
+function buyTickets(count) {
+  showToast('支付功能即将上线，敬请期待！')
+}
+
+// ═══ Countdown ═══
+const COMPETITION_START = new Date()
+const COMPETITION_DAYS = 7
+
+function initCountdown() {
+  const el = document.getElementById('prize-countdown')
+  function tick() {
+    const now = new Date()
+    const end = new Date(COMPETITION_START.getTime() + COMPETITION_DAYS * 86400000)
+    const left = end - now
+    if (left <= 0) {
+      el.textContent = '⏰ 本期已结束！'
+      return
+    }
+    const d = Math.floor(left / 86400000)
+    const h = Math.floor((left % 86400000) / 3600000)
+    el.textContent = '⏰ 还剩 ' + d + ' 天 ' + h + ' 小时'
+  }
+  tick()
+  setInterval(tick, 60000)
 }
 
 // ═══ Admin Panel ═══
@@ -303,16 +428,12 @@ function showData() {
   const panel = document.getElementById('data-panel')
   if (panel.style.display === 'block') { panel.style.display = 'none'; return }
   panel.style.display = 'block'
-  document.getElementById('data-fp').textContent = deviceFingerprint.substring(0, 20) + '...'
-  document.getElementById('data-voted').textContent = hasVoted ? '已投票' : '未投票'
-  document.getElementById('data-myvote').textContent = lastVotedCpId ? (CP_LIST.find(c => c.id === lastVotedCpId)?.name || '—') : '—'
-  if (isAdmin) {
-    document.getElementById('data-hint').textContent = '管理员模式：服务器真实数据'
-    loadSupabaseStats()
-  } else {
-    document.getElementById('data-hint').textContent = '仅管理员可见'
-    document.getElementById('data-supabase-wrap').innerHTML = ''
-  }
+  const localEl = document.getElementById('data-local')
+  localEl.innerHTML = '<p>设备: ' + deviceFingerprint.substring(0, 20) + '...<br>'
+    + '免费票: ' + (hasVotedBase ? '已用' : '可用') + '<br>'
+    + '额外票: ' + extraVotes + '<br>'
+    + '已拉人数: ' + refCount + '</p>'
+  if (isAdmin) loadSupabaseStats()
   panel.scrollIntoView({behavior:'smooth'})
 }
 
@@ -321,7 +442,7 @@ async function loadSupabaseStats() {
   try {
     let all = [], off = 0
     while (true) {
-      const batch = await fetch(SUPABASE_URL + '/rest/v1/votes?select=cp_id,voter_fingerprint,created_at,referred_by,source&limit=1000&offset=' + off, {
+      const batch = await fetch(SUPABASE_URL + '/rest/v1/votes?select=cp_id,voter_fingerprint&limit=1000&offset=' + off, {
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
       }).then(r => r.json()).catch(() => [])
       if (!batch || !batch.length) break
@@ -338,20 +459,6 @@ async function loadSupabaseStats() {
       html += '<div>' + cp.name.split('×')[0] + '</div><div style="text-align:right"><strong>' + c + '</strong>' + (s > 0 ? ' <span style="color:#ec4899;font-size:10px">(+' + s + ')</span>' : '') + '</div>'
     })
     html += '</div><div style="margin-top:4px;font-size:11px;color:var(--sub)">种子票 ≈ ' + (all.length - realVotes) + ' · 真实票 ≈ ' + realVotes + '</div></div>'
-
-    const recent = all.filter(r => !r.voter_fingerprint?.startsWith('seed_')).sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 20)
-    if (recent.length) {
-      html += '<div style="margin-top:12px;padding:12px;background:var(--bg);border-radius:12px"><strong style="font-size:13px">最近 ' + recent.length + ' 条投票</strong>'
-      html += '<div style="margin-top:6px;font-size:11px;display:grid;gap:2px">'
-      recent.forEach(r => {
-        const cp = CP_LIST.find(c => c.id === parseInt(r.cp_id))
-        const t = new Date(r.created_at).toLocaleString('zh-CN', {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})
-        html += '<div style="display:grid;grid-template-columns:36px 1fr 40px;gap:4px;padding:2px 0">'
-        html += '<span>' + t + '</span><span>' + (cp ? cp.name.split('×')[0] : 'CP#' + r.cp_id) + '</span>'
-        html += '<span style="color:var(--sub)">' + (r.source ? r.source : '直接') + '</span></div>'
-      })
-      html += '</div></div>'
-    }
     wrap.innerHTML = html
   } catch(e) {
     wrap.innerHTML = '<div style="padding:12px;background:var(--bg);border-radius:12px;color:var(--sub);font-size:12px">加载失败</div>'
@@ -361,8 +468,11 @@ async function loadSupabaseStats() {
 function showToast(msg) {
   const t = document.getElementById('toast')
   t.textContent = msg; t.classList.add('show')
-  clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.remove('show'), 2200)
+  clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.remove('show'), 2500)
 }
+
+// Poll for referral updates every 5 seconds
+setInterval(checkAndRewardReferrals, 5000)
 </script>
 </body>
 </html>
