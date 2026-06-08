@@ -80,38 +80,65 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
     <div class="cd" id="prize-cd"></div>
   </div>
 
-  <div class="wheel-wrap" style="position:relative;overflow:hidden">
-    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#ec4899,transparent);animation:pulseBar 1.5s infinite"></div>
-    <style>@keyframes pulseBar{0%,100%{opacity:.3}50%{opacity:1}}@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}</style>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <span style="font-size:13px;font-weight:800">🎰 大转盘</span>
-      <span id="urgent-timer" style="font-size:12px;font-weight:700;color:#ec4899;animation:pulse 1s infinite">⏰ 仅剩 23:59:59</span>
+  <!-- ═══ 紧迫感顶栏（主角）═══ -->
+  <div class="urgency-header">
+    <style>@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}@keyframes slideBg{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}</style>
+    <div class="uh-timer">
+      <span class="uh-label">⏰ 奖金即将过期</span>
+      <span class="uh-time" id="urgent-timer">23:59:59</span>
     </div>
-    <div style="background:linear-gradient(135deg,rgba(236,72,153,.08),rgba(251,191,36,.08));border-radius:8px;padding:8px 10px;margin-bottom:10px">
-      <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700">
-        <span>🎯 提现进度</span>
-        <span id="stage-label" style="color:#ec4899">差0.01元提现 ¥399.99</span>
+    <div class="uh-progress-wrap">
+      <div class="uh-progress-top">
+        <span class="uh-stage" id="stage-label">🎯 差0.01元提现 ¥399.99</span>
+        <span class="uh-fake-count" id="fake-users">🔥 1,284人已提</span>
       </div>
-      <div style="height:8px;background:#f0d5e8;border-radius:99px;margin:4px 0;overflow:hidden">
-        <div id="urgent-progress" style="height:100%;width:99.8%;background:linear-gradient(90deg,#ec4899,#fbbf24,#ec4899);background-size:200% 100%;animation:slide 2s infinite;border-radius:99px"></div>
-        <style>@keyframes slide{0%{background-position:200% 0}100%{background-position:-200% 0}}</style>
+      <div class="uh-bar-bg">
+        <div class="uh-bar-fill" id="urgent-progress"></div>
       </div>
-      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--sub)">
-        <span>再拉 <span id="next-stage-count" style="color:#ec4899;font-weight:700">1</span> 人进入下一阶段</span>
-        <span id="fake-users" style="color:#10b981">🔥 已有 1,284 人提现</span>
+      <div class="uh-bar-bottom">
+        <span>已获 <strong id="got-amount">¥399.99</strong></span>
+        <span>需 <strong>¥400.00</strong></span>
       </div>
     </div>
+    <div class="uh-action">
+      <div class="uh-next">
+        <span>再拉 <strong id="next-stage-count" style="font-size:22px;color:#ffd700">3</strong> 人 → 进入下一阶段</span>
+      </div>
+      <button class="uh-share-btn" onclick="copyLink()">📋 复制拉人链接</button>
+    </div>
+    <div class="uh-scroll" id="notif-area">🎉 用户 18***22 刚刚抽中额外5票！</div>
+  </div>
+
+  <style>
+  .urgency-header{background:linear-gradient(135deg,#c0392b,#e74c3c,#c0392b);background-size:200% 200%;animation:slideBg 3s ease infinite;border-radius:16px;padding:16px;margin-bottom:12px;color:#fff;box-shadow:0 4px 24px rgba(192,57,43,.3)}
+  .uh-timer{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .uh-label{font-size:12px;opacity:.8}
+  .uh-time{font-size:28px;font-weight:900;font-variant-numeric:tabular-nums;animation:pulse 1s infinite;text-shadow:0 0 20px rgba(255,255,255,.3)}
+  .uh-progress-wrap{margin-bottom:10px}
+  .uh-progress-top{display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:4px}
+  .uh-stage{color:#ffd700}
+  .uh-fake-count{font-size:10px;opacity:.7}
+  .uh-bar-bg{height:14px;background:rgba(0,0,0,.25);border-radius:99px;overflow:hidden;margin-bottom:3px}
+  .uh-bar-fill{height:100%;width:99.8%;background:linear-gradient(90deg,#ffd700,#f39c12,#ffd700);background-size:200% 100%;animation:slideBg 1.5s ease infinite;border-radius:99px;position:relative}
+  .uh-bar-fill::after{content:'仅差0.01！';position:absolute;right:-40px;top:-4px;font-size:9px;font-weight:800;color:#ffd700;white-space:nowrap}
+  .uh-bar-bottom{display:flex;justify-content:space-between;font-size:10px;opacity:.7}
+  .uh-action{text-align:center;margin-bottom:8px}
+  .uh-next{font-size:13px;font-weight:700;margin-bottom:6px}
+  .uh-share-btn{background:linear-gradient(135deg,#ffd700,#f39c12);color:#c0392b;border:none;padding:10px 32px;border-radius:99px;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 2px 12px rgba(255,215,0,.3);transition:.15s}
+  .uh-share-btn:hover{transform:scale(1.05)}
+  .uh-scroll{font-size:11px;text-align:center;opacity:.8;overflow:hidden;white-space:nowrap}
+  </style>
+
+  <!-- ═══ 转盘（配角）═══ -->
+  <div class="wheel-wrap">
     <div class="wheel-box">
       <canvas id="wheel-canvas" width="560" height="560"></canvas>
       <div class="pointer"></div>
       <button class="spin-btn" id="spin-btn" onclick="spin()" style="animation:pulse 1.5s infinite">抽奖</button>
     </div>
-    <div class="wheel-info" style="margin-top:10px">
+    <div class="wheel-info">
       <span class="spins" id="spin-count">剩余 1 次</span>
-      <span class="shares" id="share-count" style="cursor:pointer" onclick="copyLink()">已拉 0 人</span>
-    </div>
-    <div style="margin-top:8px;display:flex;gap:6px;font-size:10px;color:var(--sub);justify-content:center">
-      <span id="notif-area" style="color:#ec4899;font-weight:600">🎉 用户 18***22 刚刚抽中5票</span>
+      <span class="shares" onclick="copyLink()" style="cursor:pointer">已拉 <span id="share-count">0</span> 人</span>
     </div>
   </div>
 
@@ -337,7 +364,7 @@ function initUrgency(){
   setInterval(()=>{
     secs--;if(secs<0)secs=0
     let h=Math.floor(secs/3600),m=Math.floor((secs%3600)/60),s=secs%60
-    document.getElementById('urgent-timer').textContent='⏰ 仅剩 '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')
+    document.getElementById('urgent-timer').textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')
   },1000)
   // Stage progression
   setInterval(()=>{
