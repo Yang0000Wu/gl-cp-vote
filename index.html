@@ -370,8 +370,8 @@ async function loadVotes(){
 
 // ═══ Render (no ranking/position) ═══
 function render(){
-  let total=CP.reduce((a,c)=>a+c.v,0)
-  document.getElementById('total-votes').textContent=(total?'共 '+total+' 票 · ':'')+CP.length+' 对CP'
+  
+  document.getElementById('total-votes').textContent=CP.length+' 对CP已参赛'
 
   // Sort by votes for display but DON'T show rank numbers
   let sorted=[...CP].sort((a,b)=>b.v-a.v)
@@ -380,9 +380,9 @@ function render(){
     let canExtra=extra>0
     return '<div class="cp-card'+(c.id===lastId?' style="border-color:var(--pink)"':'')+'">'
       +'<div class="info"><div class="nm">'+c.n+'</div><div class="fr">'+c.f+'</div></div>'
-      +'<div class="vt"><div class="n">'+c.v+'</div><div class="l">票</div></div>'
+      
       +'<div style="display:flex;gap:3px;flex-direction:column">'
-      +'<button class="vb'+(canVote?'':' done')+'" onclick="voteCP('+c.id+')"'+(canVote?'':' disabled')+'>'+(tickets<=0?'无票':(todayVotedIds.includes(c.id)?'已投':'投票'))+'</button>'
+      +'<button class="vb'+(canVote?'':' done')+'" onclick="voteCP('+c.id+')"'+(canVote?'':' disabled')+'>'+(todayVotedIds.includes(c.id)?'已投':'投票')+'</button>'
       +(canExtra?'<button class="vb" onclick="useExtra('+c.id+')" style="background:#8b5cf6">额外+'+extra+'</button>':'')
       +'</div></div>'
   }).join('')
