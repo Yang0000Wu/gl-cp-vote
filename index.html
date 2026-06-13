@@ -1,13 +1,719 @@
 <!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><title>网站备案中</title>
-<style>body{background:#f5f5f5;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;font-family:sans-serif;color:#666}.box{text-align:center;padding:40px}.box h1{font-size:20px;color:#333;margin-bottom:8px}.box p{font-size:14px;line-height:1.8}</style>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes">
+<title>GL CP 竞技场</title>
+<style>
+:root{--bg:#fdf2f8;--card:#fff;--text:#1a1a2e;--sub:#6b7280;--pink:#ec4899;--purple:#8b5cf6;--accent:linear-gradient(135deg,#ec4899,#8b5cf6);--border:#f0d5e8;--shadow:0 4px 24px rgba(236,72,153,.08);--radius:20px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;line-height:1.6;min-height:100vh}
+body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 20%,rgba(236,72,153,.04) 0%,transparent 50%),radial-gradient(circle at 70% 80%,rgba(139,92,246,.04) 0%,transparent 50%);z-index:-1}
+.container{max-width:480px;margin:0 auto;padding:12px}
+
+/* ═══ Prize Banner (BIG) ═══ */
+.prize-banner{background:linear-gradient(135deg,#fbbf24,#f59e0b,#ec4899,#8b5cf6);background-size:300% 300%;border-radius:20px;padding:20px 16px;text-align:center;margin-bottom:12px;color:#fff;position:relative;overflow:hidden;animation:gradientShift 4s ease infinite}
+@keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.prize-banner::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 50%,rgba(255,255,255,.15),transparent 60%)}
+.prize-banner .t{font-size:18px;font-weight:900;margin-bottom:6px;text-shadow:0 2px 8px rgba(0,0,0,.2)}
+.prize-banner .p{font-size:15px;display:flex;justify-content:center;gap:16px;font-weight:800}
+.prize-banner .p s{background:rgba(255,255,255,.25);padding:4px 14px;border-radius:99px;backdrop-filter:blur(4px)}
+.prize-banner .cd{font-size:12px;margin-top:6px;opacity:.9;font-weight:600}
+
+.wheel-wrap{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);text-align:center}
+.wheel-wrap .wt{font-size:15px;font-weight:800;margin-bottom:2px}
+.wheel-wrap .ws{font-size:11px;color:var(--sub);margin-bottom:12px}
+.wheel-box{position:relative;width:280px;height:280px;margin:0 auto}
+.wheel-box canvas{width:280px;height:280px}
+.wheel-box .spin-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:68px;height:68px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:800;cursor:pointer;z-index:10;box-shadow:0 2px 16px rgba(236,72,153,.5);transition:.1s}
+.wheel-box .spin-btn:active{transform:translate(-50%,-50%) scale(.92)}
+.wheel-box .spin-btn:disabled{opacity:.5}
+.wheel-box .pointer{position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:22px solid #ec4899;z-index:11;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
+.wheel-info{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:12px;color:var(--sub)}
+.wheel-info .spins{background:var(--bg);padding:4px 14px;border-radius:99px;font-weight:700;color:var(--pink)}
+.wheel-info .shares{background:var(--bg);padding:4px 14px;border-radius:99px;font-weight:700;color:var(--purple)}
+.cp-card{background:var(--card);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px;border:2px solid transparent}
+.cp-card .info{flex:1;min-width:0}
+.cp-card .nm{font-size:15px;font-weight:700}
+.cp-card .fr{font-size:10px;color:var(--sub);margin-top:1px}
+.cp-card .vt{text-align:center;min-width:40px}
+.cp-card .vt .n{font-size:18px;font-weight:800;background:var(--accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cp-card .vt .l{font-size:9px;color:var(--sub)}
+.vb{background:var(--accent);color:#fff;border:none;padding:6px 12px;border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0}
+.vb:hover{opacity:.9;transform:scale(1.05)}
+.vb:disabled{opacity:.4;cursor:default;transform:none}
+.vb.done{background:#9ca3af}
+.stats-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:11px;color:var(--sub)}
+.buy-section{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);text-align:center}
+.buy-section .bt{font-size:15px;font-weight:800;margin-bottom:6px}
+.buy-section .bs{font-size:11px;color:var(--sub);margin-bottom:10px}
+.buy-options{display:flex;gap:10px;justify-content:center}
+.buy-card{background:var(--bg);border-radius:14px;padding:12px 20px;text-align:center;cursor:pointer;border:2px solid transparent;transition:.1s;flex:1;max-width:150px}
+.buy-card:active{transform:scale(.97)}
+.buy-card .bp{font-size:16px;font-weight:800;color:var(--pink)}
+.buy-card .bti{font-size:12px;color:var(--sub);margin-top:2px}
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modal-box{background:#fff;border-radius:var(--radius);padding:24px;text-align:center;max-width:340px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.15)}
+.modal-box .mt{font-size:22px;font-weight:800;margin-bottom:4px}
+.modal-box .md{font-size:14px;color:var(--sub);margin-bottom:14px;line-height:1.5;white-space:pre-line}
+.modal-box .mb{background:var(--accent);color:#fff;border:none;padding:10px 24px;border-radius:99px;font-size:14px;font-weight:700;cursor:pointer;width:100%}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 20px;border-radius:99px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+.share-section{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);text-align:center}
+.share-section .st{font-size:15px;font-weight:800;margin-bottom:4px}
+.share-section .ss{font-size:11px;color:var(--sub);margin-bottom:10px}
+.share-btn{background:var(--accent);color:#fff;border:none;padding:10px 20px;border-radius:99px;font-size:14px;font-weight:700;cursor:pointer;display:inline-block}
+.share-btn:active{transform:scale(.95)}
+/* ═══ Share Card ═══ */
+.share-card-wrap{background:var(--card);border-radius:var(--radius);padding:20px;margin-bottom:12px;box-shadow:var(--shadow);text-align:center;display:none}
+.share-card{background:linear-gradient(135deg,#fdf2f8,#fce7f3);border-radius:16px;padding:20px;border:2px solid var(--border);margin-bottom:12px}
+.share-card .sct{font-size:20px;font-weight:900;background:var(--accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
+.share-card .scs{font-size:12px;color:var(--sub);margin-bottom:8px}
+.share-card .scbox{background:#fff;border-radius:12px;padding:16px;border:1px dashed var(--pink)}
+.share-card .scbox .scp{font-size:24px;font-weight:900;color:var(--pink);margin-bottom:2px}
+.share-card .scbox .scl{font-size:11px;color:var(--sub)}
+.share-card .sclink{font-size:10px;color:var(--pink);word-break:break-all;margin-top:8px;background:var(--bg);padding:8px;border-radius:8px}
+.reg-form{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.reg-form .rt{font-size:15px;font-weight:800;margin-bottom:8px}
+.reg-form input{width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:12px;font-size:13px;margin-bottom:8px;outline:none;box-sizing:border-box}
+.reg-form input:focus{border-color:var(--pink)}
+.reg-form button{width:100%;padding:10px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer}
+.reg-form .rb{background:var(--accent);color:#fff}
+.reg-form .rb:disabled{opacity:.4}
+.reg-form .rr{font-size:11px;color:var(--sub);margin-top:6px}
+.admin-panel{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);display:none}
+.admin-panel .at{font-size:15px;font-weight:800;margin-bottom:8px}
+.admin-item{padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;justify-content:space-between;align-items:center}
+.admin-item .ai{flex:1}
+.admin-item .ab{background:#10b981;color:#fff;border:none;padding:4px 12px;border-radius:99px;font-size:11px;cursor:pointer}
+.footer{text-align:center;padding:16px 12px;font-size:10px;color:var(--sub);line-height:1.8;border-top:1px solid var(--border);margin-top:16px}
+.footer strong{color:var(--text)}
+.urgent-wrap{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.urgent-wrap .ut{font-size:14px;font-weight:800;margin-bottom:2px}
+.urgent-wrap .us{font-size:11px;color:var(--sub);margin-bottom:10px}
+.urgent-bar{height:20px;background:var(--bg);border-radius:99px;overflow:hidden;position:relative}
+.urgent-bar .fill{height:100%;background:var(--accent);border-radius:99px;transition:width .5s;width:0%}
+.urgent-bar .ul{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:10px;font-weight:700;color:var(--sub)}
+.urgent-info{display:flex;justify-content:space-between;margin-top:6px;font-size:11px}
+.social-proof{background:var(--card);border-radius:var(--radius);padding:8px 14px;margin-bottom:12px;box-shadow:var(--shadow);font-size:12px;color:var(--pink);font-weight:600;text-align:center;min-height:20px;line-height:20px}
+.data-panel{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);align-items:center;justify-content:center;z-index:1000;padding:20px}
+.data-panel .dp-box{background:#fff;border-radius:var(--radius);padding:20px;text-align:left;max-width:400px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,.15)}
+.data-panel .dpt{font-size:16px;font-weight:800;margin-bottom:8px;text-align:center}
+.data-section{font-size:12px;line-height:1.8;background:var(--bg);padding:10px;border-radius:10px;margin-bottom:8px}
+</style>
 </head>
 <body>
-<div class="box">
-<h1>网站备案中</h1>
-<p>本网站正在办理ICP备案审核<br>审核期间暂时无法访问<br>请稍后再来</p>
-<p style="font-size:12px;color:#999;margin-top:20px">844697.xyz</p>
+
+<div class="container">
+
+<!-- ═══ Prize Banner (BIG) ═══ -->
+<div class="prize-banner">
+  <div class="t">🏆 第1期CP投票赛</div>
+  <div class="p"><s>🥇 ¥1,000</s><s>🥈 ¥500</s><s>🥉 ¥300</s></div>
+  <div class="cd" id="prize-cd">⏰ 加载中...</div>
 </div>
+
+<!-- ═══ Social Proof ═══ -->
+<div class="social-proof" id="notif-area">🎉 快来为你喜欢的CP投票吧！</div>
+
+<!-- ═══ Progress Bar ═══ -->
+<div class="urgent-wrap">
+  <div class="ut">🎯 全站应援助燃</div>
+  <div class="us" id="today-progress-label">今日目标 500票</div>
+  <div class="urgent-bar">
+    <div class="fill" id="today-progress-fill" style="width:0%"></div>
+    <div class="ul" id="today-progress-text">0/500</div>
+  </div>
+  <div class="urgent-info">
+    <span>🔥 <span id="fake-users">1,284</span>人已参与</span>
+    <span>🎯 <span id="stage-label">继续加油！</span></span>
+  </div>
+</div>
+
+<!-- ═══ Wheel ═══ -->
+<div class="wheel-wrap">
+  <div class="wt">🎡 抽奖得票</div>
+  <div class="ws">每日免费抽奖 · 拉人得更多次数</div>
+  <div class="wheel-box">
+    <canvas id="wheel-canvas" width="560" height="560"></canvas>
+    <div class="pointer"></div>
+    <button class="spin-btn" id="spin-btn" onclick="spin()">抽奖</button>
+  </div>
+  <div class="wheel-info">
+    <span class="spins" id="spin-count">剩余 1 次</span>
+    <span class="shares" id="share-count">已拉 0 人</span>
+  </div>
+</div>
+
+<!-- ═══ Share Section ═══ -->
+<div class="share-section">
+  <div class="st">👥 拉人投票，你得更多抽奖</div>
+  <div class="ss">每拉1人，对方得1票+1次抽奖，你多得1次抽奖</div>
+  <button class="share-btn" onclick="showShareCard()">📋 制作拉人卡片</button>
+</div>
+
+<!-- ═══ Share Card (hidden) ═══ -->
+<div class="share-card-wrap" id="share-card-wrap">
+  <div class="share-card" id="share-card">
+    <div class="sct">🏆 GL CP 竞技场</div>
+    <div class="scs">为你喜欢的CP投上一票！</div>
+    <div class="scbox">
+      <div class="scp">🎯 点击投票</div>
+      <div class="scl">每票都是对CP的爱 ❤️</div>
+    </div>
+    <div class="sclink" id="share-link-text">加载中...</div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="share-btn" style="flex:1" onclick="copyShareLink()">📋 复制链接</button>
+    <button class="share-btn" style="flex:1;background:var(--purple)" onclick="downloadShareCard()">⬇️ 保存卡片</button>
+  </div>
+  <div style="margin-top:6px;font-size:10px;color:var(--sub)">长按卡片或截图分享到群</div>
+</div>
+
+<!-- ═══ CP List (no ranking) ═══ -->
+<div class="stats-row">
+  <span id="total-votes">加载中...</span>
+  <span style="display:flex;gap:4px">
+    <span id="my-tickets-display" style="background:var(--bg);padding:2px 10px;border-radius:99px;font-weight:700;color:var(--pink)">0票</span>
+    <span id="my-extra-display" style="background:var(--bg);padding:2px 10px;border-radius:99px;font-weight:700;color:var(--purple)" hidden>+0</span>
+  </span>
+</div>
+<div id="cp-list">加载中...</div>
+
+<!-- ═══ Buy Tickets ═══ -->
+<div class="buy-section">
+  <div class="bt">💪 买票助力</div>
+  <div class="bs">所购票数用于CP应援，与比赛奖金无关</div>
+  <div class="buy-options">
+    <div class="buy-card" onclick="buy(5)">
+      <div class="bp">¥5</div>
+      <div class="bti">5 票</div>
+    </div>
+    <div class="buy-card" onclick="buy(10)">
+      <div class="bp">¥10</div>
+      <div class="bti">12 票</div>
+    </div>
+  </div>
+  <div style="font-size:10px;color:var(--sub);margin-top:8px">支付接入中，敬请期待</div>
+</div>
+
+<!-- ═══ Register CP ═══ -->
+<div class="reg-form" id="reg-form">
+  <div class="rt">📝 创建你的CP参赛</div>
+  <input id="reg-name" placeholder="CP名（如：忧城 × 千景）" maxlength="30">
+  <input id="reg-fandom" placeholder="出处（如：《恋语轻唱》）" maxlength="30">
+  <input id="reg-contact" placeholder="你的微信（领奖需要用）" maxlength="30">
+  <button class="rb" id="reg-btn" onclick="submitRegistration()">提交申请</button>
+  <div class="rr">提交后管理员审核通过即可参赛 · 每人限创建1对CP</div>
+</div>
+
+<!-- ═══ Footer / Disclaimer ═══ -->
+<div class="footer">
+  <strong>GL CP 竞技场</strong><br>
+  1. 购买票数为自愿支持行为，所购票数用于CP应援，不可退款<br>
+  2. 比赛奖金由主办方提供，与票数购买收入无关<br>
+  3. 本活动为CP粉丝娱乐投票赛，结果仅供娱乐参考<br>
+  4. 禁止刷票、机器人等违规行为，违者取消资格<br>
+  5. 未满18岁请勿购买票数<br>
+  CP信息由用户自行提交，与本平台无关<br>
+  <span style="cursor:pointer;color:var(--pink)" onclick="showData()">📊 数据</span>
+</div>
+
+</div>
+
+<!-- ═══ Modals ═══ -->
+<div class="modal" id="result-modal">
+  <div class="modal-box">
+    <div class="mt" id="result-title">🎉</div>
+    <div class="md" id="result-desc"></div>
+    <button class="mb" id="result-btn" onclick="closeModal()">好的</button>
+  </div>
+</div>
+
+<div class="data-panel" id="data-panel">
+  <div class="dp-box">
+    <div class="dpt">📊 数据面板</div>
+    <div class="data-section" id="data-local"></div>
+    <div class="data-section" id="data-supabase-wrap"></div>
+    <button class="mb" style="margin-top:10px" onclick="document.getElementById('data-panel').style.display='none'">关闭</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ═══ Admin Panel ═══ -->
+<div class="admin-panel" id="admin-panel">
+  <div class="at">🔧 管理员面板</div>
+  <div id="admin-regs"><div style="font-size:12px;color:var(--sub)">加载中...</div></div>
+  <div style="margin-top:10px;font-size:11px;color:var(--sub)">?admin 模式</div>
+</div>
+
+<script>
+// ═══ Config ═══
+const SB_URL='https://oefzzmflkdoigfahbskc.supabase.co', SB_KEY='sb_publishable_R3EGbB23qba66lweHNbLjQ_gzxxVnqB'
+const api=(p,o)=>fetch(SB_URL+'/rest/v1/'+p,{...o,headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,...(o?.headers||{})}}).then(r=>r.json()).catch(()=>null)
+
+// Seed CPs - initially hidden, shown via admin approval only
+const SEED_CP=[
+  {id:1,n:'忧城 × 千景',f:'《恋语轻唱》',v:0,c:'#a78bfa'},
+  {id:2,n:'小糸侑 × 七海灯子',f:'《终将成为你》',v:0,c:'#60a5fa'},
+  {id:3,n:'安达 × 岛村',f:'《安达与岛村》',v:0,c:'#f472b6'},
+  {id:4,n:'LingLing × Orm',f:'《我们的秘密》',v:0,c:'#fbbf24'},
+  {id:5,n:'Freen × Becky',f:'《粉红理论》',v:0,c:'#fb923c'},
+  {id:6,n:'Milk × Love',f:'《地球倾斜23.5度》',v:0,c:'#34d399'},
+  {id:7,n:'Faye × Yoko',f:'《爱填满空白》',v:0,c:'#e879f9'},
+  {id:8,n:'Namtan × Film',f:'《冥王星》',v:0,c:'#38bdf8'},
+  {id:9,n:'席娜 × 美美',f:'《与妳相恋到生命尽头》',v:0,c:'#f87171'},
+  {id:10,n:'甘露寺蜜璃 × 胡蝶忍',f:'《鬼灭之刃》',v:0,c:'#fb7185'}
+]
+// Only show CPs that have been approved (seed are auto-approved for demo)
+let CP = JSON.parse(JSON.stringify(SEED_CP))
+
+const prizes=['🎯 额外5票','🎯 额外3票','🎯 额外2票','🎟️ 再转一次','🎁 1票安慰','💔 差亿点','🎯 额外10票','🎯 额外1票']
+
+// ═══ State ═══
+let fp='',admin=location.search.includes('admin'),lastId=null
+let tickets=1,spins=1,extra=0,refCount=0,refsDone=[]
+let todayVotedIds=[]
+
+// ═══ Init ═══
+function init(){
+  fp=localStorage.glcp_fp||(localStorage.glcp_fp='fp_'+Math.random().toString(36).substr(2,9)+'_'+Date.now().toString(36))
+  loadDailyReset()
+  extra=parseInt(localStorage.glcp_extra||'0')
+  refCount=parseInt(localStorage.glcp_refcount||'0')
+  refsDone=JSON.parse(localStorage.glcp_refs_done||'[]')
+  todayVotedIds=JSON.parse(localStorage.getItem('glcp_voted_ids_'+fp)||'[]')
+  initReferral()
+  loadVotes().then(()=>{
+    render()
+    drawWheelStatic()
+    updateUI()
+    startCountdown()
+    if(admin)document.getElementById('admin-panel').style.display='block'
+    checkReferralRewards()
+    startSocialProof()
+  })
+}
+init()
+
+function loadDailyReset(){
+  let today=new Date().toDateString()
+  let last=localStorage.glcp_last_date
+  if(last!==today){
+    tickets=1;spins=1
+    localStorage.glcp_tickets=String(tickets)
+    localStorage.glcp_spins=String(spins)
+    localStorage.glcp_last_date=today
+    localStorage.removeItem('glcp_voted_ids_'+fp)
+    todayVotedIds=[]
+  }else{
+    tickets=parseInt(localStorage.glcp_tickets||'1')
+    spins=parseInt(localStorage.glcp_spins||'1')
+  }
+}
+
+// ═══ Referral ═══
+function initReferral(){
+  let r=new URLSearchParams(location.search).get('ref')
+  if(r&&r.startsWith('share_')&&r!=='share_'+fp){
+    let refs=JSON.parse(localStorage.glcp_refs||'[]')
+    if(!refs.includes(r)){
+      refs.push(r)
+      localStorage.glcp_refs=JSON.stringify(refs)
+      tickets+=1;spins+=1
+      localStorage.glcp_tickets=String(tickets)
+      localStorage.glcp_spins=String(spins)
+    }
+  }
+}
+
+function checkReferralRewards(){
+  let refs=JSON.parse(localStorage.glcp_refs||'[]')
+  let newOnes=refs.filter(x=>!refsDone.includes(x))
+  if(newOnes.length){
+    refCount+=newOnes.length
+    localStorage.glcp_refcount=String(refCount)
+    refsDone=[...refsDone,...newOnes]
+    localStorage.glcp_refs_done=JSON.stringify(refsDone)
+    spins+=newOnes.length
+    localStorage.glcp_spins=String(spins)
+    show('🎉 拉了 '+newOnes.length+' 人！获得 '+newOnes.length+' 次抽奖')
+    updateUI()
+  }
+}
+setInterval(checkReferralRewards,3000)
+
+// ═══ Data ═══
+async function loadVotes(){
+  try{
+    let all=[],off=0
+    while(1){
+      let b=await api('votes?select=cp_id,voter_fingerprint,created_at&limit=1000&offset='+off)
+      if(!b||!b.length)break
+      all=all.concat(b)
+      if(b.length<1000)break
+      off+=1000
+    }
+    let counts={}
+    all.forEach(r=>{
+      if(r.voter_fingerprint&&r.voter_fingerprint.startsWith('seed_'))return
+      let c=parseInt(r.cp_id)
+      counts[c]=(counts[c]||0)+1
+    })
+    CP.forEach(c=>{c.v=counts[c.id]||0})
+  }catch(e){
+    let saved=JSON.parse(localStorage.glcp_votes||'{}')
+    CP.forEach(c=>{c.v=saved[c.id]||0})
+  }
+}
+
+// ═══ Render (no ranking/position) ═══
+function render(){
+  let total=CP.reduce((a,c)=>a+c.v,0)
+  document.getElementById('total-votes').textContent=(total?'共 '+total+' 票 · ':'')+CP.length+' 对CP'
+
+  // Sort by votes for display but DON'T show rank numbers
+  let sorted=[...CP].sort((a,b)=>b.v-a.v)
+  document.getElementById('cp-list').innerHTML=sorted.map(c=>{
+    let canVote=tickets>0&&!todayVotedIds.includes(c.id)
+    let canExtra=extra>0
+    return '<div class="cp-card'+(c.id===lastId?' style="border-color:var(--pink)"':'')+'">'
+      +'<div class="info"><div class="nm">'+c.n+'</div><div class="fr">'+c.f+'</div></div>'
+      +'<div class="vt"><div class="n">'+c.v+'</div><div class="l">票</div></div>'
+      +'<div style="display:flex;gap:3px;flex-direction:column">'
+      +'<button class="vb'+(canVote?'':' done')+'" onclick="voteCP('+c.id+')"'+(canVote?'':' disabled')+'>'+(tickets<=0?'无票':(todayVotedIds.includes(c.id)?'已投':'投票'))+'</button>'
+      +(canExtra?'<button class="vb" onclick="useExtra('+c.id+')" style="background:#8b5cf6">额外+'+extra+'</button>':'')
+      +'</div></div>'
+  }).join('')
+
+  document.getElementById('my-tickets-display').textContent=tickets+'票'
+  document.getElementById('my-extra-display').textContent=(extra>0?'+'+extra:'')
+  document.getElementById('my-extra-display').hidden=(extra<=0)
+}
+
+// ═══ Vote ═══
+async function voteCP(id){
+  if(tickets<=0){show('没有票了，去抽奖或拉人得票！');return}
+  if(todayVotedIds.includes(id)){show('今天已经投过这个CP了！');return}
+  tickets--
+  localStorage.glcp_tickets=String(tickets)
+  todayVotedIds.push(id)
+  localStorage.setItem('glcp_voted_ids_'+fp,JSON.stringify(todayVotedIds))
+  let c=CP.find(x=>x.id===id)
+  if(c){c.v++;lastId=id}
+  fetch(SB_URL+'/rest/v1/votes',{
+    method:'POST',
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({cp_id:id,voter_fingerprint:fp})
+  }).catch(()=>{})
+  let saved=JSON.parse(localStorage.glcp_votes||'{}')
+  saved[id]=(saved[id]||0)+1
+  localStorage.glcp_votes=JSON.stringify(saved)
+  render();updateUI();show('🎉 投票成功！')
+}
+
+function useExtra(id){
+  if(extra<=0){show('没有额外票了');return}
+  extra--
+  localStorage.glcp_extra=String(extra)
+  let c=CP.find(x=>x.id===id)
+  if(c){c.v++;lastId=id}
+  fetch(SB_URL+'/rest/v1/votes',{
+    method:'POST',
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({cp_id:id,voter_fingerprint:fp})
+  }).catch(()=>{})
+  let saved=JSON.parse(localStorage.glcp_votes||'{}')
+  saved[id]=(saved[id]||0)+1
+  localStorage.glcp_votes=JSON.stringify(saved)
+  render();updateUI();show('🎉 额外票已投！')
+}
+
+// ═══ Wheel ═══
+let spinning=false,wheelAngle=0
+function drawWheelStatic(){
+  let c=document.getElementById('wheel-canvas'),ctx=c.getContext('2d'),n=prizes.length,a=Math.PI*2/n
+  let colors=['#ff6b6b','#feca57','#48dbfb','#ff9ff3','#54a0ff','#5f27cd','#01a3a4','#f368e0']
+  ctx.clearRect(0,0,560,560)
+  ctx.save();ctx.translate(280,280);ctx.rotate(wheelAngle);ctx.translate(-280,-280)
+  for(let i=0;i<n;i++){
+    ctx.beginPath();ctx.moveTo(280,280);ctx.arc(280,280,280,i*a,i*a+a);ctx.closePath()
+    ctx.fillStyle=colors[i%colors.length];ctx.fill()
+    ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke()
+    ctx.save();ctx.translate(280,280);ctx.rotate(i*a+a/2)
+    ctx.textAlign='right';ctx.fillStyle='#fff';ctx.font='bold 20px sans-serif'
+    ctx.fillText(prizes[i],260,6);ctx.restore()
+  }
+  ctx.restore()
+  ctx.beginPath();ctx.arc(280,280,40,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill()
+  ctx.strokeStyle='#ec4899';ctx.lineWidth=4;ctx.stroke()
+}
+
+function spin(){
+  if(spinning)return
+  if(spins<=0){
+    // Show better message: go share or wait till tomorrow
+    showModal('😅 没有抽奖次数了','💡 拉人得抽奖：每拉1人多1次\n💡 明天刷新：每天免费1次\n💡 拉到人后自动获得次数','share')
+    return
+  }
+  spins--;localStorage.glcp_spins=String(spins)
+  spinning=true;document.getElementById('spin-btn').disabled=true
+  let n=prizes.length,a=Math.PI*2/n
+  let targetIdx=Math.floor(Math.random()*n)
+  let targetAngle=targetIdx*a+5*Math.PI*2+Math.random()*0.3
+  let startAngle=wheelAngle,endAngle=startAngle+targetAngle
+  let dur=2500,start=performance.now()
+  function anim(now){
+    let t=Math.min((now-start)/dur,1)
+    let ease=1-Math.pow(1-t,3)
+    wheelAngle=startAngle+(endAngle-startAngle)*ease
+    drawWheelStatic()
+    if(t<1)requestAnimationFrame(anim)
+    else done(targetIdx)
+  }
+  function done(idx){
+    spinning=false;document.getElementById('spin-btn').disabled=false;updateUI()
+    let p=prizes[idx]
+    let match=p.match(/(\d+)票/)
+    let reward=match?parseInt(match[1]):0
+    if(p.includes('再转')){
+      spins++;localStorage.glcp_spins=String(spins)
+      showModal('🔄 再转一次','运气不错，再来一次！')
+      updateUI();return
+    }
+    if(p.includes('差亿点')||p.includes('安慰')){
+      extra+=1;localStorage.glcp_extra=String(extra)
+      showModal('💔 差亿点','获得了 +1 票安慰奖！再拉1人试试手气','share')
+      render();updateUI();return
+    }
+    extra+=reward;localStorage.glcp_extra=String(extra)
+    let word=reward>=5?'🎉':'👍'
+    showModal(word+' 获得 +'+reward+'票','票数已存入额外票，可以投给喜欢的CP！')
+    render();updateUI()
+  }
+  requestAnimationFrame(anim)
+}
+
+// ═══ Share Card ═══
+function showShareCard(){
+  let wrap=document.getElementById('share-card-wrap')
+  if(wrap.style.display==='block'){wrap.style.display='none';return}
+  let link=location.origin+location.pathname+'?ref=share_'+fp
+  document.getElementById('share-link-text').textContent=link
+  wrap.style.display='block'
+  wrap.scrollIntoView({behavior:'smooth'})
+}
+
+function copyShareLink(){
+  let link=location.origin+location.pathname+'?ref=share_'+fp
+  // Fallback for HTTP (clipboard API may not work without HTTPS)
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(link).then(()=>show('🔗 链接已复制！'))
+  }else{
+    // Fallback: select text
+    let ta=document.createElement('textarea')
+    ta.value=link;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta)
+    show('🔗 链接已复制！')
+  }
+}
+
+function downloadShareCard(){
+  show('📸 截图分享到群吧！')
+}
+
+// ═══ Buy ═══
+function buy(n){
+  let t=n===5?5:12
+  showModal('💪 购买 '+t+' 票','¥'+n+' → '+t+'票\n支付即将上线，敬请期待！')
+}
+
+// ═══ Registration ═══
+async function submitRegistration(){
+  let name=document.getElementById('reg-name').value.trim()
+  let fandom=document.getElementById('reg-fandom').value.trim()
+  let contact=document.getElementById('reg-contact').value.trim()
+  if(!name||!fandom||!contact){show('请填写完整信息');return}
+  document.getElementById('reg-btn').disabled=true
+  document.getElementById('reg-btn').textContent='提交中...'
+  try{
+    await fetch(SB_URL+'/rest/v1/cp_registrations',{
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({cp_name:name,fandom:fandom,contact:contact,status:'pending',created_at:new Date().toISOString()})
+    })
+  }catch(e){}
+  let regs=JSON.parse(localStorage.glcp_registrations||'[]')
+  regs.push({id:Date.now(),name,fandom,contact,status:'pending',date:new Date().toISOString()})
+  localStorage.glcp_registrations=JSON.stringify(regs)
+  document.getElementById('reg-name').value=''
+  document.getElementById('reg-fandom').value=''
+  document.getElementById('reg-contact').value=''
+  document.getElementById('reg-btn').disabled=false
+  document.getElementById('reg-btn').textContent='提交申请'
+  showModal('✅ 提交成功','管理员审核通过后即可参赛！')
+}
+
+// ═══ Admin ═══
+function loadAdminRegistrations(){
+  if(!admin)return
+  let regs=JSON.parse(localStorage.glcp_registrations||'[]')
+  let html='<div style="font-size:13px;font-weight:700;margin-bottom:6px">待审核 CP ('+regs.filter(r=>r.status==='pending').length+')</div>'
+  if(regs.length===0){
+    html+='<div style="font-size:12px;color:var(--sub)">暂无注册申请</div>'
+  }else{
+    regs.reverse().forEach(r=>{
+      html+='<div class="admin-item">'
+        +'<div class="ai"><strong>'+r.name+'</strong> '+r.fandom+'<br><span style="font-size:10px;color:var(--sub)">微信: '+r.contact+' · '+new Date(r.date).toLocaleDateString()+'</span></div>'
+        +(r.status==='pending'?'<button class="ab" onclick="approveCP('+r.id+')">批准</button>':'<span style="font-size:10px;color:#10b981">已批准</span>')
+        +'</div>'
+    })
+  }
+  document.getElementById('admin-regs').innerHTML=html
+}
+
+function approveCP(id){
+  let regs=JSON.parse(localStorage.glcp_registrations||'[]')
+  let r=regs.find(x=>x.id===id)
+  if(!r)return
+  r.status='approved'
+  localStorage.glcp_registrations=JSON.stringify(regs)
+  let newId=CP.length+1
+  CP.push({id:newId,n:r.name,f:r.fandom,v:0,c:'#a78bfa'})
+  try{
+    fetch(SB_URL+'/rest/v1/cp_registrations',{
+      method:'PATCH',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({status:'approved'})
+    })
+  }catch(e){}
+  show('✅ 已批准：'+r.name)
+  loadAdminRegistrations()
+  loadVotes().then(()=>render())
+}
+
+// ═══ Social Proof ═══
+function startSocialProof(){
+  let users=['18***22','13***45','15***67','19***01','11***88','16***32','17***55','12***77','14***99','10***23']
+  setInterval(()=>{
+    let u=users[Math.floor(Math.random()*users.length)]
+    let fakeT=Math.floor(Math.random()*5)+1
+    document.getElementById('notif-area').textContent='🎉 用户 '+u+' 刚刚抽中 +'+fakeT+'票'
+    let n=parseInt(document.getElementById('fake-users').textContent.replace(/[^0-9]/g,'')||'1284')
+    document.getElementById('fake-users').textContent='🔥 '+(n+Math.floor(Math.random()*2+1))+'人已参与'
+  },4000)
+}
+
+// ═══ UI ═══
+function updateUI(){
+  document.getElementById('spin-count').textContent='剩余 '+spins+' 次'
+  document.getElementById('share-count').textContent='已拉 '+refCount+' 人'
+  document.getElementById('spin-btn').disabled=(spins<=0)
+}
+
+// ═══ Countdown ═══
+function startCountdown(){
+  let el=document.getElementById('prize-cd')
+  let end=new Date();end.setDate(end.getDate()+30)
+  function tick(){
+    let left=end-new Date()
+    if(left<=0){el.textContent='⏰ 本期已结束！';return}
+    el.textContent='⏰ 还剩 '+Math.floor(left/86400000)+' 天 '+Math.floor((left%86400000)/3600000)+' 时 '+Math.floor((left%3600000)/60000)+' 分'
+  }
+  tick();setInterval(tick,60000)
+}
+
+// ═══ Modal ═══
+function showModal(t,d,btn){
+  document.getElementById('result-title').textContent=t
+  document.getElementById('result-desc').textContent=d
+  let btnEl=document.getElementById('result-btn')
+  if(btn==='share'){
+    btnEl.textContent='📋 制作拉人卡片'
+    btnEl.onclick=()=>{closeModal();showShareCard()}
+  }else{
+    btnEl.textContent='好的'
+    btnEl.onclick=closeModal
+  }
+  document.getElementById('result-modal').style.display='flex'
+}
+function closeModal(){document.getElementById('result-modal').style.display='none'}
+
+// ═══ Toast ═══
+function show(m){
+  let t=document.getElementById('toast')
+  t.textContent=m;t.classList.add('show')
+  clearTimeout(t._timer)
+  t._timer=setTimeout(()=>t.classList.remove('show'),2500)
+}
+
+// ═══ Data Panel ═══
+function showData(){
+  let p=document.getElementById('data-panel')
+  if(p.style.display==='flex'){p.style.display='none';return}
+  p.style.display='flex'
+  document.getElementById('data-local').innerHTML=
+    '<strong>本地数据</strong><br>'
+    +'设备: '+fp.substr(0,20)+'...<br>'
+    +'今日票: '+tickets+'<br>'
+    +'额外票: '+extra+'<br>'
+    +'抽奖: '+spins+' 次<br>'
+    +'拉人: '+refCount+' 人<br>'
+    +'今日已投CP: '+(todayVotedIds.length>0?todayVotedIds.join(', '):'无')
+  if(admin)loadAdminStats()
+}
+
+async function loadAdminStats(){
+  let w=document.getElementById('data-supabase-wrap')
+  try{
+    let all=[],off=0
+    while(1){
+      let b=await api('votes?select=cp_id,voter_fingerprint&limit=1000&offset='+off)
+      if(!b||!b.length)break
+      all=all.concat(b)
+      if(b.length<1000)break
+      off+=1000
+    }
+    let counts={},seedCounts={}
+    all.forEach(r=>{
+      counts[r.cp_id]=(counts[r.cp_id]||0)+1
+      if(r.voter_fingerprint?.startsWith('seed_'))seedCounts[r.cp_id]=(seedCounts[r.cp_id]||0)+1
+    })
+    let real=all.length-Object.values(seedCounts).reduce((a,b)=>a+b,0)
+    let h='<strong>服务器数据</strong><br>总票数：'+all.length+' · 真实：<strong style="color:#ec4899">'+real+'</strong><br>'
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;margin-top:4px;font-size:11px">'
+    ;[...CP].sort((a,b)=>(counts[b.id]||0)-(counts[a.id]||0)).forEach(c=>{
+      let ct=counts[c.id]||0,cs=Math.max(0,ct-(seedCounts[c.id]||0))
+      h+='<div>'+c.n.split('×')[0]+'</div><div style="text-align:right"><strong>'+ct+'</strong>'+(cs?' <span style="color:#ec4899;font-size:9px">(+'+cs+')</span>':'')+'</div>'
+    })
+    h+='</div>'+'<div style="margin-top:3px;font-size:10px;color:var(--sub)">种子票 ≈ '+(all.length-real)+' · 真实 ≈ '+real+'</div>'
+    w.innerHTML=h
+  }catch(e){w.innerHTML='<div style="font-size:12px;color:var(--sub)">加载失败（可能是Supabase未配置）</div>'}
+}
+
+// ═══ Load extra CPs from admin approvals ═══
+function loadExtraCPs(){
+  try{
+    let saved=JSON.parse(localStorage.glcp_cp_extra||'[]')
+    if(saved.length>SEED_CP.length){
+      CP=JSON.parse(JSON.stringify(saved))
+      CP.forEach(c=>{c.v=0})
+    }
+  }catch(e){}
+}
+loadExtraCPs()
+
+if(admin){
+  setTimeout(()=>{
+    loadAdminRegistrations()
+    loadAdminStats()
+  },1000)
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  let canvas=document.getElementById('wheel-canvas')
+  if(canvas)drawWheelStatic()
+})
+</script>
 </body>
 </html>
