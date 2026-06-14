@@ -64,15 +64,6 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 .share-section .ss{font-size:11px;color:var(--sub);margin-bottom:10px}
 .share-btn{background:var(--accent);color:#fff;border:none;padding:10px 20px;border-radius:99px;font-size:14px;font-weight:700;cursor:pointer;display:inline-block}
 .share-btn:active{transform:scale(.95)}
-/* ═══ Share Card ═══ */
-.share-card-wrap{background:var(--card);border-radius:var(--radius);padding:20px;margin-bottom:12px;box-shadow:var(--shadow);text-align:center;display:none}
-.share-card{background:linear-gradient(135deg,#fdf2f8,#fce7f3);border-radius:16px;padding:20px;border:2px solid var(--border);margin-bottom:12px}
-.share-card .sct{font-size:20px;font-weight:900;background:var(--accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
-.share-card .scs{font-size:12px;color:var(--sub);margin-bottom:8px}
-.share-card .scbox{background:#fff;border-radius:12px;padding:16px;border:1px dashed var(--pink)}
-.share-card .scbox .scp{font-size:24px;font-weight:900;color:var(--pink);margin-bottom:2px}
-.share-card .scbox .scl{font-size:11px;color:var(--sub)}
-.share-card .sclink{font-size:10px;color:var(--pink);word-break:break-all;margin-top:8px;background:var(--bg);padding:8px;border-radius:8px}
 .reg-form{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
 .reg-form .rt{font-size:15px;font-weight:800;margin-bottom:8px}
 .reg-form input{width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:12px;font-size:13px;margin-bottom:8px;outline:none;box-sizing:border-box}
@@ -149,36 +140,8 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 <div class="share-section">
   <div class="st">👥 拉人投票，你得更多抽奖</div>
   <div class="ss">每拉1人，对方得1票+1次抽奖，你多得1次抽奖</div>
-  <button class="share-btn" onclick="showShareCard()">📋 制作拉人卡片</button>
+  <button class="share-btn" onclick="copyLink()">📋 复制拉人链接</button>
 </div>
-
-<!-- ═══ Share Card (hidden) ═══ -->
-<div class="share-card-wrap" id="share-card-wrap">
-  <div class="share-card" id="share-card">
-    <div class="sct">🏆 GL CP 竞技场</div>
-    <div class="scs">为你喜欢的CP投上一票！</div>
-    <div class="scbox">
-      <div class="scp">🎯 点击投票</div>
-      <div class="scl">每票都是对CP的爱 ❤️</div>
-    </div>
-    <div class="sclink" id="share-link-text">加载中...</div>
-  </div>
-  <div style="display:flex;gap:8px">
-    <button class="share-btn" style="flex:1" onclick="copyShareLink()">📋 复制链接</button>
-    <button class="share-btn" style="flex:1;background:var(--purple)" onclick="downloadShareCard()">⬇️ 保存卡片</button>
-  </div>
-  <div style="margin-top:6px;font-size:10px;color:var(--sub)">长按卡片或截图分享到群</div>
-</div>
-
-<!-- ═══ CP List (no ranking) ═══ -->
-<div class="stats-row">
-  <span id="total-votes">加载中...</span>
-  <span style="display:flex;gap:4px">
-    <span id="my-tickets-display" style="background:var(--bg);padding:2px 10px;border-radius:99px;font-weight:700;color:var(--pink)">0票</span>
-    <span id="my-extra-display" style="background:var(--bg);padding:2px 10px;border-radius:99px;font-weight:700;color:var(--purple)" hidden>+0</span>
-  </span>
-</div>
-<div id="cp-list">加载中...</div>
 
 <!-- ═══ Buy Tickets ═══ -->
 <div class="buy-section">
@@ -267,7 +230,7 @@ const SEED_CP=[
   {id:10,n:'甘露寺蜜璃 × 胡蝶忍',f:'《鬼灭之刃》',v:0,c:'#fb7185'}
 ]
 // Only show CPs that have been approved (seed are auto-approved for demo)
-let CP = JSON.parse(JSON.stringify(SEED_CP))
+let CP = []
 
 const prizes=['🎯 额外5票','🎯 额外3票','🎯 额外2票','🎟️ 再转一次','🎁 1票安慰','💔 差亿点','🎯 额外10票','🎯 额外1票']
 
@@ -495,31 +458,16 @@ function spin(){
   requestAnimationFrame(anim)
 }
 
-// ═══ Share Card ═══
-function showShareCard(){
-  let wrap=document.getElementById('share-card-wrap')
-  if(wrap.style.display==='block'){wrap.style.display='none';return}
-  let link=location.origin+location.pathname+'?ref=share_'+fp
-  document.getElementById('share-link-text').textContent=link
-  wrap.style.display='block'
-  wrap.scrollIntoView({behavior:'smooth'})
-}
-
-function copyShareLink(){
-  let link=location.origin+location.pathname+'?ref=share_'+fp
-  // Fallback for HTTP (clipboard API may not work without HTTPS)
+// ═══ Copy Link ═══
+function copyLink(){
+  let l=location.origin+location.pathname+"?ref=share_"+fp
   if(navigator.clipboard){
-    navigator.clipboard.writeText(link).then(()=>show('🔗 链接已复制！'))
+    navigator.clipboard.writeText(l).then(()=>show("🔗 链接已复制！"))
   }else{
-    // Fallback: select text
-    let ta=document.createElement('textarea')
-    ta.value=link;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta)
-    show('🔗 链接已复制！')
+    let ta=document.createElement("textarea")
+    ta.value=l;document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta)
+    show("🔗 链接已复制！")
   }
-}
-
-function downloadShareCard(){
-  show('📸 截图分享到群吧！')
 }
 
 // ═══ Buy ═══
@@ -630,7 +578,7 @@ function showModal(t,d,btn){
   let btnEl=document.getElementById('result-btn')
   if(btn==='share'){
     btnEl.textContent='📋 制作拉人卡片'
-    btnEl.onclick=()=>{closeModal();showShareCard()}
+    btnEl.onclick=()=>{closeModal();copyLink()}
   }else{
     btnEl.textContent='好的'
     btnEl.onclick=closeModal
